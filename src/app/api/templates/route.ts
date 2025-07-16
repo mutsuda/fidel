@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { PrismaClient } from "../../../generated/prisma";
 
-// Debug: Verificar variables de entorno
-console.log("POSTGRES_URL available:", !!process.env.POSTGRES_URL);
-console.log("DATABASE_URL available:", !!process.env.DATABASE_URL);
-
 const prisma = new PrismaClient();
 
 export async function GET() {
