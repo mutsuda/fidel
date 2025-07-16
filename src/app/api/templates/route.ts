@@ -1,18 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { PrismaClient } from "../../../generated/prisma";
-
-// Configurar DATABASE_URL para Vercel
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = "file:./dev.db";
-}
 
 const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Para el MVP, retornamos un array vacío
-    // En producción, aquí iría la lógica de autenticación
-    return NextResponse.json([]);
+    const session = await getServerSession();
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+    }
+
+    const templates = await prisma.template.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return NextResponse.json(templates);
   } catch (error) {
     console.error("Error fetching templates:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -21,6 +34,20 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession();
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+    }
+
     const formData = await request.formData();
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -34,17 +61,6 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     const dataUrl = `data:${file.type};base64,${base64}`;
-
-    // Crear un usuario temporal para el MVP
-    let user = await prisma.user.findFirst();
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: "temp@example.com",
-          name: "Usuario Temporal"
-        }
-      });
-    }
 
     const template = await prisma.template.create({
       data: {

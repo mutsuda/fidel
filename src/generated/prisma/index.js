@@ -87,6 +87,9 @@ Prisma.NullTypes = {
  * Enums
  */
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
+  ReadUncommitted: 'ReadUncommitted',
+  ReadCommitted: 'ReadCommitted',
+  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 });
 
@@ -137,6 +140,11 @@ exports.Prisma.ScanScalarFieldEnum = {
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
 };
 
 exports.Prisma.NullsOrder = {
@@ -194,18 +202,18 @@ const config = {
   "datasourceNames": [
     "db"
   ],
-  "activeProvider": "sqlite",
+  "activeProvider": "postgresql",
   "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
-        "fromEnvVar": "DATABASE_URL",
+        "fromEnvVar": "POSTGRES_URL",
         "value": null
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/prisma\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String     @id @default(cuid())\n  email     String     @unique\n  name      String?\n  password  String? // Si usas OAuth, puede ser null\n  createdAt DateTime   @default(now())\n  batches   Batch[]\n  templates Template[]\n}\n\nmodel Template {\n  id          String   @id @default(cuid())\n  name        String\n  description String?\n  imageUrl    String // URL de la plantilla subida\n  user        User     @relation(fields: [userId], references: [id])\n  userId      String\n  createdAt   DateTime @default(now())\n  batches     Batch[]\n}\n\nmodel Batch {\n  id          String   @id @default(cuid())\n  name        String // Nombre del lote (ej: \"Tarjetas Evento XYZ\")\n  description String?\n  quantity    Int // Cantidad de tarjetas en el lote\n  template    Template @relation(fields: [templateId], references: [id])\n  templateId  String\n  user        User     @relation(fields: [userId], references: [id])\n  userId      String\n  createdAt   DateTime @default(now())\n  codes       Code[]\n}\n\nmodel Code {\n  id        String   @id @default(cuid())\n  code      String   @unique // Código legible (ej: ABC123)\n  hash      String   @unique // Hash único para QR\n  number    Int // Número secuencial en el lote\n  batch     Batch    @relation(fields: [batchId], references: [id])\n  batchId   String\n  createdAt DateTime @default(now())\n  scans     Scan[] // Estadísticas de uso\n}\n\nmodel Scan {\n  id        String   @id @default(cuid())\n  code      Code     @relation(fields: [codeId], references: [id])\n  codeId    String\n  ipAddress String?\n  userAgent String?\n  scannedAt DateTime @default(now())\n}\n",
-  "inlineSchemaHash": "23918ee78df36ae086c4bf400b4af6b8531d3bd30c91158399c7d7449ee18d04",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/prisma\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"POSTGRES_URL\")\n}\n\nmodel User {\n  id        String     @id @default(cuid())\n  email     String     @unique\n  name      String?\n  password  String? // Si usas OAuth, puede ser null\n  createdAt DateTime   @default(now())\n  batches   Batch[]\n  templates Template[]\n}\n\nmodel Template {\n  id          String   @id @default(cuid())\n  name        String\n  description String?\n  imageUrl    String // URL de la plantilla subida\n  user        User     @relation(fields: [userId], references: [id])\n  userId      String\n  createdAt   DateTime @default(now())\n  batches     Batch[]\n}\n\nmodel Batch {\n  id          String   @id @default(cuid())\n  name        String // Nombre del lote (ej: \"Tarjetas Evento XYZ\")\n  description String?\n  quantity    Int // Cantidad de tarjetas en el lote\n  template    Template @relation(fields: [templateId], references: [id])\n  templateId  String\n  user        User     @relation(fields: [userId], references: [id])\n  userId      String\n  createdAt   DateTime @default(now())\n  codes       Code[]\n}\n\nmodel Code {\n  id        String   @id @default(cuid())\n  code      String   @unique // Código legible (ej: ABC123)\n  hash      String   @unique // Hash único para QR\n  number    Int // Número secuencial en el lote\n  batch     Batch    @relation(fields: [batchId], references: [id])\n  batchId   String\n  createdAt DateTime @default(now())\n  scans     Scan[] // Estadísticas de uso\n}\n\nmodel Scan {\n  id        String   @id @default(cuid())\n  code      Code     @relation(fields: [codeId], references: [id])\n  codeId    String\n  ipAddress String?\n  userAgent String?\n  scannedAt DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "28ce2a8226b5ffcfc8b0cdc19c4027a0287465247d73aaf38efe15fd1f37f23b",
   "copyEngine": true
 }
 
