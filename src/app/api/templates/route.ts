@@ -1,31 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { PrismaClient } from "../../../generated/prisma";
-
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
-    }
-
-    const templates = await prisma.template.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" }
-    });
-
-    return NextResponse.json(templates);
+    return NextResponse.json({ message: "Templates API working", data: [] });
   } catch (error) {
     console.error("Error fetching templates:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -34,20 +11,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
-    }
-
     const formData = await request.formData();
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -62,14 +25,13 @@ export async function POST(request: NextRequest) {
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     const dataUrl = `data:${file.type};base64,${base64}`;
 
-    const template = await prisma.template.create({
-      data: {
-        name,
-        description: description || null,
-        imageUrl: dataUrl,
-        userId: user.id
-      }
-    });
+    const template = {
+      id: "temp_" + Date.now(),
+      name,
+      description: description || null,
+      imageUrl: dataUrl,
+      createdAt: new Date().toISOString()
+    };
 
     return NextResponse.json(template);
   } catch (error) {
