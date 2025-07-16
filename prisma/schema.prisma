@@ -20,28 +20,50 @@ model User {
   name      String?
   password  String? // Si usas OAuth, puede ser null
   createdAt DateTime @default(now())
-  cards     LoyaltyCard[]
-  designs   CardDesign[]
+  batches   Batch[]
+  templates Template[]
 }
 
-model CardDesign {
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String   // URL de la plantilla subida
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime @default(now())
+  batches     Batch[]
+}
+
+model Batch {
+  id          String   @id @default(cuid())
+  name        String   // Nombre del lote (ej: "Tarjetas Evento XYZ")
+  description String?
+  quantity    Int      // Cantidad de tarjetas en el lote
+  template    Template @relation(fields: [templateId], references: [id])
+  templateId  String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime @default(now())
+  codes       Code[]
+}
+
+model Code {
   id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  name      String
-  imageUrl  String
+  code      String   @unique // Código legible (ej: ABC123)
+  hash      String   @unique // Hash único para QR
+  number    Int      // Número secuencial en el lote
+  batch     Batch    @relation(fields: [batchId], references: [id])
+  batchId   String
   createdAt DateTime @default(now())
-  cards     LoyaltyCard[]
+  scans     Scan[]   // Estadísticas de uso
 }
 
-model LoyaltyCard {
+model Scan {
   id        String   @id @default(cuid())
-  code      String   @unique
-  hash      String
-  qrUrl     String?
-  design    CardDesign @relation(fields: [designId], references: [id])
-  designId  String
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String
-  createdAt DateTime  @default(now())
+  code      Code     @relation(fields: [codeId], references: [id])
+  codeId    String
+  ipAddress String?
+  userAgent String?
+  scannedAt DateTime @default(now())
 }
