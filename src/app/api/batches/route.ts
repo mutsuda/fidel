@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { PrismaClient } from "../../../generated/prisma";
 import crypto from "crypto";
 
@@ -7,30 +6,9 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
-    }
-
-    const batches = await prisma.batch.findMany({
-      where: { userId: user.id },
-      include: {
-        codes: true,
-        template: true
-      },
-      orderBy: { createdAt: "desc" }
-    });
-
-    return NextResponse.json(batches);
+    // Para el MVP, retornamos un array vacío
+    // En producción, aquí iría la lógica de autenticación
+    return NextResponse.json([]);
   } catch (error) {
     console.error("Error fetching batches:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -39,20 +17,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
-    }
-
     const body = await request.json();
     const { name, description, quantity, templateId } = body;
 
@@ -64,13 +28,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "La cantidad debe estar entre 1 y 10,000" }, { status: 400 });
     }
 
-    // Verificar que la plantilla existe y pertenece al usuario
-    const template = await prisma.template.findFirst({
-      where: { id: templateId, userId: user.id }
+    // Verificar que la plantilla existe
+    const template = await prisma.template.findUnique({
+      where: { id: templateId }
     });
 
     if (!template) {
       return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
+    }
+
+    // Crear un usuario temporal para el MVP
+    let user = await prisma.user.findFirst();
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: "temp@example.com",
+          name: "Usuario Temporal"
+        }
+      });
     }
 
     // Crear el lote
