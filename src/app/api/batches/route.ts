@@ -7,8 +7,16 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Devolver un array vacío como espera el frontend
-    return NextResponse.json([]);
+    const batches = await prisma.batch.findMany({
+      include: {
+        template: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    return NextResponse.json(batches);
   } catch (error) {
     console.error("Error fetching batches:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -28,18 +36,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "La cantidad debe estar entre 1 y 10,000" }, { status: 400 });
     }
 
-    // Para el MVP, crear un lote simulado
-    const batch = {
-      id: "batch_" + Date.now(),
-      name,
-      description: description || null,
-      quantity,
-      templateId,
-      createdAt: new Date().toISOString(),
-      codes: []
-    };
+    // Crear el lote en la base de datos
+    const batch = await prisma.batch.create({
+      data: {
+        name,
+        description: description || null,
+        quantity,
+        templateId,
+        userId: "temp_user_id" // Temporal, después se conectará con NextAuth
+      },
+      include: {
+        template: true
+      }
+    });
 
-    return NextResponse.json(batch);
+    // Generar códigos para el lote
+    const codes = [];
+    for (let i = 1; i <= quantity; i++) {
+      const code = generateCode(i);
+      const hash = crypto.randomBytes(32).toString('hex');
+      
+      await prisma.code.create({
+        data: {
+          code,
+          hash,
+          number: i,
+          batchId: batch.id
+        }
+      });
+      
+      codes.push({ code, hash, number: i });
+    }
+
+    return NextResponse.json({ ...batch, codes });
   } catch (error) {
     console.error("Error creating batch:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });

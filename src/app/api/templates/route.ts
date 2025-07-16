@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "../../../generated/prisma";
+
+const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Devolver un array vacío como espera el frontend
-    return NextResponse.json([]);
+    const templates = await prisma.template.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    return NextResponse.json(templates);
   } catch (error) {
     console.error("Error fetching templates:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -26,13 +34,16 @@ export async function POST(request: NextRequest) {
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     const dataUrl = `data:${file.type};base64,${base64}`;
 
-    const template = {
-      id: "temp_" + Date.now(),
-      name,
-      description: description || null,
-      imageUrl: dataUrl,
-      createdAt: new Date().toISOString()
-    };
+    // Crear la plantilla en la base de datos
+    // Por ahora usamos un userId temporal, después se conectará con autenticación
+    const template = await prisma.template.create({
+      data: {
+        name,
+        description: description || null,
+        imageUrl: dataUrl,
+        userId: "temp_user_id" // Temporal, después se conectará con NextAuth
+      }
+    });
 
     return NextResponse.json(template);
   } catch (error) {
