@@ -34,14 +34,27 @@ export async function POST(request: NextRequest) {
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     const dataUrl = `data:${file.type};base64,${base64}`;
 
+    // Crear o encontrar usuario temporal
+    let tempUser = await prisma.user.findUnique({
+      where: { email: "temp@example.com" }
+    });
+
+    if (!tempUser) {
+      tempUser = await prisma.user.create({
+        data: {
+          email: "temp@example.com",
+          name: "Usuario Temporal"
+        }
+      });
+    }
+
     // Crear la plantilla en la base de datos
-    // Por ahora usamos un userId temporal, después se conectará con autenticación
     const template = await prisma.template.create({
       data: {
         name,
         description: description || null,
         imageUrl: dataUrl,
-        userId: "temp_user_id" // Temporal, después se conectará con NextAuth
+        userId: tempUser.id
       }
     });
 

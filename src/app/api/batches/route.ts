@@ -36,6 +36,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "La cantidad debe estar entre 1 y 10,000" }, { status: 400 });
     }
 
+    // Crear o encontrar usuario temporal
+    let tempUser = await prisma.user.findUnique({
+      where: { email: "temp@example.com" }
+    });
+
+    if (!tempUser) {
+      tempUser = await prisma.user.create({
+        data: {
+          email: "temp@example.com",
+          name: "Usuario Temporal"
+        }
+      });
+    }
+
     // Crear el lote en la base de datos
     const batch = await prisma.batch.create({
       data: {
@@ -43,7 +57,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         quantity,
         templateId,
-        userId: "temp_user_id" // Temporal, después se conectará con NextAuth
+        userId: tempUser.id
       },
       include: {
         template: true
