@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -28,17 +28,12 @@ export default function LoginPage() {
     setIsLoading(false);
   };
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    await signIn("google", { callbackUrl: "/dashboard" });
-  };
-
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="bg-white rounded shadow p-8 w-full max-w-sm flex flex-col items-center">
         <h2 className="text-2xl font-bold mb-6 text-blue-700">Iniciar sesión</h2>
         
-        <form onSubmit={handleEmailLogin} className="w-full mb-4">
+        <form onSubmit={handleEmailLogin} className="w-full">
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Email:</label>
             <input
@@ -49,7 +44,7 @@ export default function LoginPage() {
               required
             />
           </div>
-          <div className="mb-4">
+          <div className="mb-6">
             <label className="block text-gray-700 mb-2">Contraseña:</label>
             <input
               type="password"
@@ -64,19 +59,9 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {isLoading ? "Iniciando..." : "Iniciar sesión con email"}
+            {isLoading ? "Iniciando..." : "Iniciar sesión"}
           </button>
         </form>
-
-        <div className="w-full">
-          <button
-            onClick={handleGoogleLogin}
-            disabled={isLoading}
-            className="w-full py-2 px-4 bg-gray-200 text-blue-700 rounded hover:bg-gray-300 transition disabled:opacity-50"
-          >
-            {isLoading ? "Iniciando..." : "Iniciar sesión con Google"}
-          </button>
-        </div>
       </div>
     </main>
   );
