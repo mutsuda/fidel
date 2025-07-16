@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    return NextResponse.json({ message: "Templates API working", data: [] });
+    // Devolver un array vacío como espera el frontend
+    return NextResponse.json([]);
   } catch (error) {
     console.error("Error fetching templates:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
