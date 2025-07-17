@@ -106,9 +106,54 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const id = getIdFromRequest(request);
+    const body = await request.json();
+    const { cardId, active, incrementUses } = body;
+    if (!cardId) {
+      return NextResponse.json({ error: "cardId requerido" }, { status: 400 });
+    }
+    // Buscar la tarjeta
+    const card = await prisma.code.findUnique({ where: { id: cardId } });
+    if (!card) {
+      return NextResponse.json({ error: "Tarjeta no encontrada" }, { status: 404 });
+    }
+    // Actualizar estado y/o usos
+    let data: any = {};
+    if (typeof active === "boolean") data.active = active;
+    if (incrementUses) data.uses = { increment: 1 };
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
+    }
+    const updated = await prisma.code.update({
+      where: { id: cardId },
+      data
+    });
+    return NextResponse.json({ success: true, card: updated });
+  } catch (error) {
+    console.error("Error actualizando tarjeta:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}
+
 function generateCode(batchId: string, number: number): string {
+  // Genera un código robusto, único, de 10 caracteres, usando letras y números
   const crypto = require("crypto");
-  const base = batchId + number;
-  const hash = crypto.createHash('sha256').update(base).digest('hex');
-  return hash.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let code = "";
+  // Usa un hash fuerte del batchId, number y un random
+  const hash = crypto.createHash('sha256')
+    .update(batchId + number + crypto.randomBytes(16).toString('hex'))
+    .digest('base64');
+  // Convierte el hash a solo caracteres válidos
+  for (let i = 0; code.length < 10 && i < hash.length; i++) {
+    const c = hash[i];
+    if (chars.includes(c)) code += c;
+  }
+  // Si por alguna razón no llega a 10, rellena con random
+  while (code.length < 10) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
 } 

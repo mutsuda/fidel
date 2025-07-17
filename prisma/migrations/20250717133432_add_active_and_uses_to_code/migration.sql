@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Code" ADD COLUMN     "active" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "uses" INTEGER NOT NULL DEFAULT 0;

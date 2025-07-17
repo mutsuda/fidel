@@ -153,7 +153,9 @@ exports.Prisma.CodeScalarFieldEnum = {
   hash: 'hash',
   number: 'number',
   batchId: 'batchId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  active: 'active',
+  uses: 'uses'
 };
 
 exports.Prisma.ScanScalarFieldEnum = {

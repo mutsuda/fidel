@@ -58,6 +58,8 @@ model Code {
   batchId   String
   createdAt DateTime @default(now())
   scans     Scan[] // Estadísticas de uso
+  active    Boolean  @default(true)
+  uses      Int      @default(0)
 }
 
 model Scan {
