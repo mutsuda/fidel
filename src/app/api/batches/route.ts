@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       }
     });
     // Agregar codesCount a cada batch
-    const batchesWithCodes = batches.map(batch => ({
+    const batchesWithCodes = batches.map((batch: any) => ({
       ...batch,
       codesCount: batch._count.codes,
       codes: []
