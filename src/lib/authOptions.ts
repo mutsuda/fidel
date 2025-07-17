@@ -1,6 +1,10 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import type { AuthOptions, SessionStrategy } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "../generated/prisma";
+
+const prisma = new PrismaClient();
 
 // Extiende el tipo de sesión para incluir siempre user.id
 declare module "next-auth" {
@@ -15,6 +19,7 @@ declare module "next-auth" {
 }
 
 const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -40,7 +45,7 @@ const authOptions: AuthOptions = {
     }),
   ],
   session: {
-    strategy: "jwt" as SessionStrategy,
+    strategy: "database",
   },
   pages: {
     signIn: "/login",
