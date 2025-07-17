@@ -3,14 +3,18 @@ import { PrismaClient } from "../../../../generated/prisma";
 
 const prisma = new PrismaClient();
 
+function getIdFromRequest(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  // /api/batches/[id] => [id] es el último segmento
+  return pathname.split("/").pop() || "";
+}
+
 // GET /api/batches/[id] - Detalles del batch y sus tarjetas
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
+    const id = getIdFromRequest(request);
     const batch = await prisma.batch.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         template: true,
         codes: {
@@ -43,11 +47,9 @@ export async function GET(
 }
 
 // DELETE /api/batches/[id]?cardId=... - Revocar (eliminar) una tarjeta
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
+    const id = getIdFromRequest(request);
     const { searchParams } = new URL(request.url);
     const cardId = searchParams.get("cardId");
     if (!cardId) {
@@ -62,18 +64,16 @@ export async function DELETE(
 }
 
 // POST /api/batches/[id] - Crear más tarjetas en el batch
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
+    const id = getIdFromRequest(request);
     const body = await request.json();
     const { quantity } = body;
     if (!quantity || quantity < 1 || quantity > 10000) {
       return NextResponse.json({ error: "Cantidad inválida" }, { status: 400 });
     }
     // Buscar el batch
-    const batch = await prisma.batch.findUnique({ where: { id: params.id } });
+    const batch = await prisma.batch.findUnique({ where: { id } });
     if (!batch) {
       return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
     }
