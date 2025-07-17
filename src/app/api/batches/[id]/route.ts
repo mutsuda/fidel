@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
     }
     // Formatear tarjetas para mostrar solo id, code, última validación, active, uses
-    const cards = batch.codes.map(card => ({
+    const cards = batch.codes.map((card: any) => ({
       id: card.id,
       code: card.code,
       lastValidated: card.scans[0]?.scannedAt || null,
