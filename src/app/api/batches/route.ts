@@ -15,8 +15,12 @@ export async function GET() {
         createdAt: 'desc'
       }
     });
-    
-    return NextResponse.json(batches);
+    // Agregar codes: [] a cada batch para evitar errores en el frontend
+    const batchesWithCodes = batches.map(batch => ({
+      ...batch,
+      codes: []
+    }));
+    return NextResponse.json(batchesWithCodes);
   } catch (error) {
     console.error("Error fetching batches:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
