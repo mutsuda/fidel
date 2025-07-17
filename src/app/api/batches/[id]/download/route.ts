@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "../../../../../generated/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import authOptions from "../../../auth/authOptions";
 import { PDFDocument, rgb } from "pdf-lib";
 import QRCode from "qrcode";
 
