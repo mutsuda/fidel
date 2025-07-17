@@ -7,8 +7,12 @@ const prisma = new PrismaClient();
 
 function getIdFromRequest(request: NextRequest) {
   const { pathname } = new URL(request.url);
+  const segments = pathname.split("/");
+  console.log("[DEBUG] Original API path segments:", segments);
   // /api/batches/[id] => [id] es el penúltimo segmento
-  return pathname.split("/").at(-2) || "";
+  const id = segments.at(-2) || "";
+  console.log("[DEBUG] Original API extracted ID:", id);
+  return id;
 }
 
 // GET /api/batches/[id] - Detalles del batch y sus tarjetas
