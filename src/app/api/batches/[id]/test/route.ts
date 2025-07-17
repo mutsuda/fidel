@@ -7,8 +7,8 @@ function getIdFromRequest(request: NextRequest) {
   const { pathname } = new URL(request.url);
   const segments = pathname.split("/");
   console.log("[DEBUG] Test API path segments:", segments);
-  // Para /api/batches/[id]/test, el ID está en la posición -3
-  return segments.at(-3) || "";
+  // Para /api/batches/[id]/test, el ID está en la posición -2
+  return segments.at(-2) || "";
 }
 
 export async function GET(request: NextRequest) {

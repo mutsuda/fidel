@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 
 function getIdFromRequest(request: NextRequest) {
   const { pathname } = new URL(request.url);
-  // /api/batches/[id]/simple => [id] es el penúltimo segmento
   const segments = pathname.split("/");
   console.log("[DEBUG] Path segments:", segments);
   // Para /api/batches/[id]/simple, el ID está en la posición -2
