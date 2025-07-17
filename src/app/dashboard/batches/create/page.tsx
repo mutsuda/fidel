@@ -21,7 +21,8 @@ export default function CreateBatchPage() {
     name: "",
     description: "",
     quantity: 100,
-    templateId: ""
+    templateId: "",
+    initialUses: ""
   });
 
   useEffect(() => {
@@ -50,16 +51,23 @@ export default function CreateBatchPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    let initialUsesValue: number | null = null;
+    if (formData.initialUses && formData.initialUses !== "ilimitado") {
+      const parsed = parseInt(formData.initialUses);
+      if (!isNaN(parsed) && parsed >= 0) initialUsesValue = parsed;
+    }
+    const body = {
+      ...formData,
+      initialUses: initialUsesValue
+    };
     try {
       const response = await fetch("/api/batches", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(body),
       });
-
       if (response.ok) {
         const data = await response.json();
         router.push(`/dashboard/batches/${data.id}`);
@@ -204,6 +212,24 @@ export default function CreateBatchPage() {
                   ))}
                 </select>
               )}
+            </div>
+
+            <div>
+              <label htmlFor="initialUses" className="block text-sm font-medium text-gray-700 mb-2">
+                Usos iniciales por tarjeta
+              </label>
+              <input
+                type="text"
+                id="initialUses"
+                name="initialUses"
+                value={formData.initialUses}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej: 10 o 'ilimitado'"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Deja vacío o escribe 'ilimitado' para tarjetas sin límite de usos
+              </p>
             </div>
 
             <div className="flex space-x-4 pt-4">

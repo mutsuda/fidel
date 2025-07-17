@@ -110,7 +110,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const id = getIdFromRequest(request);
     const body = await request.json();
-    const { cardId, active, incrementUses } = body;
+    const { cardId, active, incrementUses, decrementUses } = body;
     if (!cardId) {
       return NextResponse.json({ error: "cardId requerido" }, { status: 400 });
     }
@@ -123,6 +123,7 @@ export async function PATCH(request: NextRequest) {
     let data: any = {};
     if (typeof active === "boolean") data.active = active;
     if (incrementUses) data.uses = { increment: 1 };
+    if (decrementUses && card.uses !== null && card.uses > 0) data.uses = { decrement: 1 };
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
     }

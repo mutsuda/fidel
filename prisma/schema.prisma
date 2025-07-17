@@ -59,7 +59,7 @@ model Code {
   createdAt DateTime @default(now())
   scans     Scan[]   // Estadísticas de uso
   active    Boolean  @default(true)
-  uses      Int      @default(0)
+  uses      Int?     @default(0)
 }
 
 model Scan {

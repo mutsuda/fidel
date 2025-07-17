@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, quantity, templateId } = body;
+    const { name, description, quantity, templateId, initialUses } = body;
 
     if (!name || !quantity || !templateId) {
       return NextResponse.json({ error: "Nombre, cantidad y plantilla son requeridos" }, { status: 400 });
@@ -73,16 +73,15 @@ export async function POST(request: NextRequest) {
     for (let i = 1; i <= quantity; i++) {
       const code = generateCode(batch.id, i);
       const hash = crypto.randomBytes(32).toString('hex');
-      
       await prisma.code.create({
         data: {
           code,
           hash,
           number: i,
-          batchId: batch.id
+          batchId: batch.id,
+          uses: (typeof initialUses === 'number' && initialUses >= 0) ? initialUses : null
         }
       });
-      
       codes.push({ code, hash, number: i });
     }
 

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Code" ALTER COLUMN "uses" DROP NOT NULL;

@@ -8,7 +8,7 @@ interface Card {
   code: string;
   lastValidated: string | null;
   active: boolean;
-  uses: number;
+  uses: number | null;
 }
 
 interface Batch {
@@ -59,6 +59,11 @@ export default function BatchDetailPage() {
     setUpdating(null);
   };
 
+  function decrementUsesValue(uses: number | null): number | null {
+    if (uses === null) return null;
+    return Math.max(0, uses - 1);
+  }
+
   const incrementUses = async (card: Card) => {
     setUpdating(card.id);
     const res = await fetch(`/api/batches/${batchId}`, {
@@ -70,6 +75,26 @@ export default function BatchDetailPage() {
       setBatch(batch => batch ? {
         ...batch,
         codes: batch.codes.map(c => c.id === card.id ? { ...c, uses: c.uses + 1 } : c)
+      } : batch);
+    }
+    setUpdating(null);
+  };
+
+  const decrementUses = async (card: Card) => {
+    setUpdating(card.id);
+    const res = await fetch(`/api/batches/${batchId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardId: card.id, decrementUses: true })
+    });
+    if (res.ok) {
+      setBatch(batch => batch ? {
+        ...batch,
+        codes: batch.codes.map(c =>
+          c.id === card.id
+            ? { ...c, uses: decrementUsesValue(c.uses) }
+            : c
+        )
       } : batch);
     }
     setUpdating(null);
@@ -96,7 +121,7 @@ export default function BatchDetailPage() {
       }}>
         <div style={{ fontWeight: "bold" }}>Código</div>
         <div style={{ fontWeight: "bold" }}>Última validación</div>
-        <div style={{ fontWeight: "bold" }}>Usos</div>
+        <div style={{ fontWeight: "bold" }}>Usos restantes</div>
         <div style={{ fontWeight: "bold" }}>Activo</div>
         {batch.codes.length === 0 && (
           <div style={{ gridColumn: "1 / span 4" }}>No hay tarjetas activas</div>
@@ -106,14 +131,14 @@ export default function BatchDetailPage() {
             <div>{card.code}</div>
             <div>{card.lastValidated ? new Date(card.lastValidated).toLocaleString() : "Nunca"}</div>
             <div>
-              {card.uses}
+              {card.uses === null ? "∞" : card.uses}
               <button
-                onClick={() => incrementUses(card)}
-                disabled={updating === card.id || !card.active}
+                onClick={() => decrementUses(card)}
+                disabled={updating === card.id || !card.active || (card.uses !== null && card.uses <= 0)}
                 style={{ marginLeft: 8, padding: "2px 8px", borderRadius: 4, border: "1px solid #ccc", background: "#fff" }}
-                title="Sumar uso"
+                title="Restar uso"
               >
-                +1
+                -1
               </button>
             </div>
             <div>

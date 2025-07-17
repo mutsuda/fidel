@@ -4915,7 +4915,7 @@ export namespace Prisma {
     batchId: string
     createdAt: Date
     active: boolean
-    uses: number
+    uses: number | null
     _count: CodeCountAggregateOutputType | null
     _avg: CodeAvgAggregateOutputType | null
     _sum: CodeSumAggregateOutputType | null
@@ -5013,7 +5013,7 @@ export namespace Prisma {
       batchId: string
       createdAt: Date
       active: boolean
-      uses: number
+      uses: number | null
     }, ExtArgs["result"]["code"]>
     composites: {}
   }
@@ -7318,7 +7318,7 @@ export namespace Prisma {
     batchId?: StringFilter<"Code"> | string
     createdAt?: DateTimeFilter<"Code"> | Date | string
     active?: BoolFilter<"Code"> | boolean
-    uses?: IntFilter<"Code"> | number
+    uses?: IntNullableFilter<"Code"> | number | null
     batch?: XOR<BatchScalarRelationFilter, BatchWhereInput>
     scans?: ScanListRelationFilter
   }
@@ -7331,7 +7331,7 @@ export namespace Prisma {
     batchId?: SortOrder
     createdAt?: SortOrder
     active?: SortOrder
-    uses?: SortOrder
+    uses?: SortOrderInput | SortOrder
     batch?: BatchOrderByWithRelationInput
     scans?: ScanOrderByRelationAggregateInput
   }
@@ -7347,7 +7347,7 @@ export namespace Prisma {
     batchId?: StringFilter<"Code"> | string
     createdAt?: DateTimeFilter<"Code"> | Date | string
     active?: BoolFilter<"Code"> | boolean
-    uses?: IntFilter<"Code"> | number
+    uses?: IntNullableFilter<"Code"> | number | null
     batch?: XOR<BatchScalarRelationFilter, BatchWhereInput>
     scans?: ScanListRelationFilter
   }, "id" | "code" | "hash">
@@ -7360,7 +7360,7 @@ export namespace Prisma {
     batchId?: SortOrder
     createdAt?: SortOrder
     active?: SortOrder
-    uses?: SortOrder
+    uses?: SortOrderInput | SortOrder
     _count?: CodeCountOrderByAggregateInput
     _avg?: CodeAvgOrderByAggregateInput
     _max?: CodeMaxOrderByAggregateInput
@@ -7379,7 +7379,7 @@ export namespace Prisma {
     batchId?: StringWithAggregatesFilter<"Code"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Code"> | Date | string
     active?: BoolWithAggregatesFilter<"Code"> | boolean
-    uses?: IntWithAggregatesFilter<"Code"> | number
+    uses?: IntNullableWithAggregatesFilter<"Code"> | number | null
   }
 
   export type ScanWhereInput = {
@@ -7646,7 +7646,7 @@ export namespace Prisma {
     number: number
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
     batch: BatchCreateNestedOneWithoutCodesInput
     scans?: ScanCreateNestedManyWithoutCodeInput
   }
@@ -7659,7 +7659,7 @@ export namespace Prisma {
     batchId: string
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
     scans?: ScanUncheckedCreateNestedManyWithoutCodeInput
   }
 
@@ -7670,7 +7670,7 @@ export namespace Prisma {
     number?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
     batch?: BatchUpdateOneRequiredWithoutCodesNestedInput
     scans?: ScanUpdateManyWithoutCodeNestedInput
   }
@@ -7683,7 +7683,7 @@ export namespace Prisma {
     batchId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
     scans?: ScanUncheckedUpdateManyWithoutCodeNestedInput
   }
 
@@ -7695,7 +7695,7 @@ export namespace Prisma {
     batchId: string
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
   }
 
   export type CodeUpdateManyMutationInput = {
@@ -7705,7 +7705,7 @@ export namespace Prisma {
     number?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type CodeUncheckedUpdateManyInput = {
@@ -7716,7 +7716,7 @@ export namespace Prisma {
     batchId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type ScanCreateInput = {
@@ -8031,6 +8031,17 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type BatchScalarRelationFilter = {
     is?: BatchWhereInput
     isNot?: BatchWhereInput
@@ -8095,6 +8106,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type CodeScalarRelationFilter = {
@@ -8380,6 +8407,14 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type BatchUpdateOneRequiredWithoutCodesNestedInput = {
     create?: XOR<BatchCreateWithoutCodesInput, BatchUncheckedCreateWithoutCodesInput>
     connectOrCreate?: BatchCreateOrConnectWithoutCodesInput
@@ -8577,6 +8612,33 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type BatchCreateWithoutUserInput = {
@@ -8845,7 +8907,7 @@ export namespace Prisma {
     number: number
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
     scans?: ScanCreateNestedManyWithoutCodeInput
   }
 
@@ -8856,7 +8918,7 @@ export namespace Prisma {
     number: number
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
     scans?: ScanUncheckedCreateNestedManyWithoutCodeInput
   }
 
@@ -8955,7 +9017,7 @@ export namespace Prisma {
     batchId?: StringFilter<"Code"> | string
     createdAt?: DateTimeFilter<"Code"> | Date | string
     active?: BoolFilter<"Code"> | boolean
-    uses?: IntFilter<"Code"> | number
+    uses?: IntNullableFilter<"Code"> | number | null
   }
 
   export type BatchCreateWithoutCodesInput = {
@@ -9072,7 +9134,7 @@ export namespace Prisma {
     number: number
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
     batch: BatchCreateNestedOneWithoutCodesInput
   }
 
@@ -9084,7 +9146,7 @@ export namespace Prisma {
     batchId: string
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
   }
 
   export type CodeCreateOrConnectWithoutScansInput = {
@@ -9110,7 +9172,7 @@ export namespace Prisma {
     number?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
     batch?: BatchUpdateOneRequiredWithoutCodesNestedInput
   }
 
@@ -9122,7 +9184,7 @@ export namespace Prisma {
     batchId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type BatchCreateManyUserInput = {
@@ -9242,7 +9304,7 @@ export namespace Prisma {
     number: number
     createdAt?: Date | string
     active?: boolean
-    uses?: number
+    uses?: number | null
   }
 
   export type CodeUpdateWithoutBatchInput = {
@@ -9252,7 +9314,7 @@ export namespace Prisma {
     number?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
     scans?: ScanUpdateManyWithoutCodeNestedInput
   }
 
@@ -9263,7 +9325,7 @@ export namespace Prisma {
     number?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
     scans?: ScanUncheckedUpdateManyWithoutCodeNestedInput
   }
 
@@ -9274,7 +9336,7 @@ export namespace Prisma {
     number?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    uses?: IntFieldUpdateOperationsInput | number
+    uses?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type ScanCreateManyCodeInput = {
