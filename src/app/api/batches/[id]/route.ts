@@ -19,10 +19,11 @@ export async function GET(request: NextRequest) {
   }
   try {
     const id = getIdFromRequest(request);
-    console.log("[DEBUG] GET batch - batchId:", id, "userId:", session.user.id);
+    const userId = session.user.id;
+    console.log("[DEBUG] GET batch - batchId:", id, "userId:", userId);
     
     const batch = await prisma.batch.findFirst({
-      where: { id, userId: session.user.id },
+      where: { id, userId },
       include: {
         template: true,
         codes: {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     console.log("[DEBUG] Batch found - exists:", !!batch, "batchUserId:", batch?.userId);
     
     if (!batch) {
-      return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Batch no encontrado", batchId: id, userId }, { status: 404 });
     }
     // Formatear tarjetas para mostrar solo id, code, última validación, active, uses
     const cards = batch.codes.map((card: any) => ({
