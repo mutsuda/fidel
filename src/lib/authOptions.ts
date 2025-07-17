@@ -6,6 +6,15 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// LOG de depuración para ver si Prisma está bien inicializado en runtime
+console.log("[DEBUG] Prisma Adapter init:", {
+  prismaType: typeof prisma,
+  hasUser: typeof prisma.user,
+  prismaKeys: Object.keys(prisma),
+  env: process.env.NODE_ENV,
+  nodeVersion: process.version
+});
+
 // Extiende el tipo de sesión para incluir siempre user.id
 declare module "next-auth" {
   interface Session {
