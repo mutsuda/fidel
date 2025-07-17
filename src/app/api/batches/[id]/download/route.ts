@@ -16,6 +16,7 @@ const CARDS_PER_COL = 5;
 const CARDS_PER_PAGE = CARDS_PER_ROW * CARDS_PER_COL;
 const MARGIN_X = (PAGE_WIDTH - (CARDS_PER_ROW * CARD_WIDTH)) / 2;
 const MARGIN_Y = 36; // 0.5 inch
+const CROP_MARK = 3 * MM_TO_PT; // 3mm en puntos
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,6 +81,69 @@ export async function GET(request: NextRequest) {
           size: 10,
           color: rgb(0, 0, 0)
         });
+        // --- Marcas de corte ---
+        // Verticales (izquierda y derecha)
+        if (col === 0) {
+          // Izquierda
+          page.drawLine({
+            start: { x: x, y: y - CROP_MARK },
+            end: { x: x, y: y },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+          page.drawLine({
+            start: { x: x, y: y + CARD_HEIGHT },
+            end: { x: x, y: y + CARD_HEIGHT + CROP_MARK },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+        }
+        if (col === CARDS_PER_ROW - 1) {
+          // Derecha
+          page.drawLine({
+            start: { x: x + CARD_WIDTH, y: y - CROP_MARK },
+            end: { x: x + CARD_WIDTH, y: y },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+          page.drawLine({
+            start: { x: x + CARD_WIDTH, y: y + CARD_HEIGHT },
+            end: { x: x + CARD_WIDTH, y: y + CARD_HEIGHT + CROP_MARK },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+        }
+        // Horizontales (arriba y abajo)
+        if (row === 0) {
+          // Arriba
+          page.drawLine({
+            start: { x: x - CROP_MARK, y: y + CARD_HEIGHT },
+            end: { x: x, y: y + CARD_HEIGHT },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+          page.drawLine({
+            start: { x: x + CARD_WIDTH, y: y + CARD_HEIGHT },
+            end: { x: x + CARD_WIDTH + CROP_MARK, y: y + CARD_HEIGHT },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+        }
+        if (row === CARDS_PER_COL - 1) {
+          // Abajo
+          page.drawLine({
+            start: { x: x - CROP_MARK, y: y },
+            end: { x: x, y: y },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+          page.drawLine({
+            start: { x: x + CARD_WIDTH, y: y },
+            end: { x: x + CARD_WIDTH + CROP_MARK, y: y },
+            thickness: 0.5,
+            color: rgb(0.2, 0.2, 0.2)
+          });
+        }
       }
     }
 
