@@ -79,7 +79,7 @@ const authOptions: AuthOptions = {
     async session({ session, token }: { session: any, token: any }) {
       console.log("[DEBUG] session callback", { session, token });
       if (session.user) {
-        session.user.id = token.sub!;
+        session.user.id = token.id || token.sub!;
       }
       return session;
     },
