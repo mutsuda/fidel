@@ -130,8 +130,10 @@ export default function BatchesPage() {
                     Ver Detalles
                   </Link>
                   <Link
-                    href={`/dashboard/batches/${batch.id}/download`}
+                    href={`/api/batches/${batch.id}/download`}
                     className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition text-center"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     Descargar
                   </Link>
