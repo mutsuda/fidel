@@ -61,10 +61,21 @@ const authOptions: AuthOptions = {
   },
   callbacks: {
     async session({ session, token }: { session: any, token: any }) {
+      console.log("[DEBUG] session callback", { session, token });
       if (session.user) {
         session.user.id = token.sub!;
       }
       return session;
+    },
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log("[DEBUG] signIn callback", { user, account, profile, email, credentials });
+      try {
+        const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+        console.log("[DEBUG] signIn prisma.user.findUnique", { dbUser });
+      } catch (err) {
+        console.error("[DEBUG] signIn prisma.user.findUnique ERROR", err);
+      }
+      return true;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
