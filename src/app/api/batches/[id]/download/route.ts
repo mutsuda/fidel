@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "../../../../../generated/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../auth/[...nextauth]/route";
 import { PDFDocument, rgb } from "pdf-lib";
 import QRCode from "qrcode";
 
@@ -19,14 +21,18 @@ const MARGIN_Y = 36; // 0.5 inch
 const CROP_MARK = 3 * MM_TO_PT; // 3mm en puntos
 
 export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const { pathname } = new URL(request.url);
     const batchId = pathname.split("/").at(-2);
     if (!batchId) return NextResponse.json({ error: "BatchId requerido" }, { status: 400 });
 
-    // Obtener batch, plantilla y tarjetas
-    const batch = await prisma.batch.findUnique({
-      where: { id: batchId },
+    // Obtener batch, plantilla y tarjetas SOLO del usuario autenticado
+    const batch = await prisma.batch.findFirst({
+      where: { id: batchId, userId: session.user.id },
       include: {
         template: true,
         codes: true

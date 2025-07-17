@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "../../../../generated/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
 function getIdFromRequest(request: NextRequest) {
   const { pathname } = new URL(request.url);
-  // /api/batches/[id] => [id] es el último segmento
-  return pathname.split("/").pop() || "";
+  // /api/batches/[id] => [id] es el penúltimo segmento
+  return pathname.split("/").at(-2) || "";
 }
 
 // GET /api/batches/[id] - Detalles del batch y sus tarjetas
 export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const id = getIdFromRequest(request);
-    const batch = await prisma.batch.findUnique({
-      where: { id },
+    const batch = await prisma.batch.findFirst({
+      where: { id, userId: session.user.id },
       include: {
         template: true,
         codes: {
@@ -30,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (!batch) {
       return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
     }
-    // Formatear tarjetas para mostrar solo id, code, última validación
+    // Formatear tarjetas para mostrar solo id, code, última validación, active, uses
     const cards = batch.codes.map(card => ({
       id: card.id,
       code: card.code,
@@ -50,12 +56,26 @@ export async function GET(request: NextRequest) {
 
 // DELETE /api/batches/[id]?cardId=... - Revocar (eliminar) una tarjeta
 export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const id = getIdFromRequest(request);
     const { searchParams } = new URL(request.url);
     const cardId = searchParams.get("cardId");
     if (!cardId) {
       return NextResponse.json({ error: "cardId requerido" }, { status: 400 });
+    }
+    // Solo permitir borrar tarjetas del usuario
+    const card = await prisma.code.findFirst({
+      where: {
+        id: cardId,
+        batch: { userId: session.user.id }
+      }
+    });
+    if (!card) {
+      return NextResponse.json({ error: "Tarjeta no encontrada o no autorizada" }, { status: 404 });
     }
     await prisma.code.delete({ where: { id: cardId } });
     return NextResponse.json({ success: true });
@@ -67,6 +87,10 @@ export async function DELETE(request: NextRequest) {
 
 // POST /api/batches/[id] - Crear más tarjetas en el batch
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const id = getIdFromRequest(request);
     const body = await request.json();
@@ -74,8 +98,8 @@ export async function POST(request: NextRequest) {
     if (!quantity || quantity < 1 || quantity > 10000) {
       return NextResponse.json({ error: "Cantidad inválida" }, { status: 400 });
     }
-    // Buscar el batch
-    const batch = await prisma.batch.findUnique({ where: { id } });
+    // Buscar el batch del usuario
+    const batch = await prisma.batch.findFirst({ where: { id, userId: session.user.id } });
     if (!batch) {
       return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
     }
@@ -109,6 +133,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const id = getIdFromRequest(request);
     const body = await request.json();
@@ -116,10 +144,15 @@ export async function PATCH(request: NextRequest) {
     if (!cardId) {
       return NextResponse.json({ error: "cardId requerido" }, { status: 400 });
     }
-    // Buscar la tarjeta
-    const card = await prisma.code.findUnique({ where: { id: cardId } });
+    // Solo permitir modificar tarjetas del usuario
+    const card = await prisma.code.findFirst({
+      where: {
+        id: cardId,
+        batch: { userId: session.user.id }
+      }
+    });
     if (!card) {
-      return NextResponse.json({ error: "Tarjeta no encontrada" }, { status: 404 });
+      return NextResponse.json({ error: "Tarjeta no encontrada o no autorizada" }, { status: 404 });
     }
     // Actualizar estado y/o usos
     let data: any = {};

@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "../../../generated/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const templates = await prisma.template.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      }
+      where: { userId: session.user.id },
+      orderBy: { createdAt: 'desc' }
     });
-    
     return NextResponse.json(templates);
   } catch (error) {
     console.error("Error fetching templates:", error);
@@ -19,6 +23,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const formData = await request.formData();
     const name = formData.get("name") as string;
@@ -34,27 +42,13 @@ export async function POST(request: NextRequest) {
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     const dataUrl = `data:${file.type};base64,${base64}`;
 
-    // Crear o encontrar usuario temporal
-    let tempUser = await prisma.user.findUnique({
-      where: { email: "temp@example.com" }
-    });
-
-    if (!tempUser) {
-      tempUser = await prisma.user.create({
-        data: {
-          email: "temp@example.com",
-          name: "Usuario Temporal"
-        }
-      });
-    }
-
     // Crear la plantilla en la base de datos
     const template = await prisma.template.create({
       data: {
         name,
         description: description || null,
         imageUrl: dataUrl,
-        userId: tempUser.id
+        userId: session.user.id
       }
     });
 

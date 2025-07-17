@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { PrismaClient } from "../../../generated/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     // Obtener todos los batches y contar las tarjetas asociadas
     const batches = await prisma.batch.findMany({
+      where: { userId: session.user.id },
       include: {
         template: true,
         _count: { select: { codes: true } }
@@ -31,6 +37,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const { name, description, quantity, templateId, initialUses } = body;
@@ -43,20 +53,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "La cantidad debe estar entre 1 y 10,000" }, { status: 400 });
     }
 
-    // Crear o encontrar usuario temporal
-    let tempUser = await prisma.user.findUnique({
-      where: { email: "temp@example.com" }
-    });
-
-    if (!tempUser) {
-      tempUser = await prisma.user.create({
-        data: {
-          email: "temp@example.com",
-          name: "Usuario Temporal"
-        }
-      });
-    }
-
     // Crear el lote en la base de datos
     const batch = await prisma.batch.create({
       data: {
@@ -64,7 +60,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         quantity,
         templateId,
-        userId: tempUser.id
+        userId: session.user.id
       },
       include: {
         template: true

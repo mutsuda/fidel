@@ -1,6 +1,7 @@
-import NextAuth from "next-auth";
+import type { AuthOptions, SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import NextAuth from "next-auth";
 
 declare module "next-auth" {
   interface Session {
@@ -13,7 +14,7 @@ declare module "next-auth" {
   }
 }
 
-const handler = NextAuth({
+const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -39,13 +40,13 @@ const handler = NextAuth({
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as SessionStrategy,
   },
   pages: {
     signIn: "/login",
   },
   callbacks: {
-    async session({ session, token }) {
+    async session({ session, token }: { session: any, token: any }) {
       if (session.user) {
         session.user.id = token.sub!;
       }
@@ -54,6 +55,8 @@ const handler = NextAuth({
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
-});
+};
 
-export { handler as GET, handler as POST }; 
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST, authOptions }; 
