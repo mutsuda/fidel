@@ -26,6 +26,7 @@ export default function BatchDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [editUses, setEditUses] = useState<{ [id: string]: string }>({});
 
   useEffect(() => {
     if (!batchId) return;
@@ -59,45 +60,29 @@ export default function BatchDetailPage() {
     setUpdating(null);
   };
 
-  function decrementUsesValue(uses: number | null): number | null {
-    if (uses === null) return null;
-    return Math.max(0, uses - 1);
-  }
-
-  const incrementUses = async (card: Card) => {
-    setUpdating(card.id);
-    const res = await fetch(`/api/batches/${batchId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cardId: card.id, incrementUses: true })
-    });
-    if (res.ok) {
-      setBatch(batch => batch ? {
-        ...batch,
-        codes: batch.codes.map(c => c.id === card.id ? { ...c, uses: c.uses + 1 } : c)
-      } : batch);
-    }
-    setUpdating(null);
+  const handleUsesChange = (card: Card, value: string) => {
+    setEditUses(prev => ({ ...prev, [card.id]: value }));
   };
 
-  const decrementUses = async (card: Card) => {
-    setUpdating(card.id);
-    const res = await fetch(`/api/batches/${batchId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cardId: card.id, decrementUses: true })
-    });
-    if (res.ok) {
-      setBatch(batch => batch ? {
-        ...batch,
-        codes: batch.codes.map(c =>
-          c.id === card.id
-            ? { ...c, uses: decrementUsesValue(c.uses) }
-            : c
-        )
-      } : batch);
+  const handleUsesBlur = async (card: Card) => {
+    const value = editUses[card.id];
+    if (card.uses === null || value === undefined) return;
+    const parsed = parseInt(value);
+    if (!isNaN(parsed) && parsed >= 0 && parsed !== card.uses) {
+      setUpdating(card.id);
+      const res = await fetch(`/api/batches/${batchId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardId: card.id, setUses: parsed })
+      });
+      if (res.ok) {
+        setBatch(batch => batch ? {
+          ...batch,
+          codes: batch.codes.map(c => c.id === card.id ? { ...c, uses: parsed } : c)
+        } : batch);
+      }
+      setUpdating(null);
     }
-    setUpdating(null);
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -109,45 +94,46 @@ export default function BatchDetailPage() {
       <h1>Lote: {batch.name}</h1>
       <p>{batch.description}</p>
       <p>Creado: {new Date(batch.createdAt).toLocaleString()}</p>
-      <h2>Tarjetas activas</h2>
+      <h2>Tarjetas</h2>
       <div style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr 1fr",
-        gap: 12,
+        gridTemplateColumns: "1fr 1fr 1fr 60px",
+        gap: 0,
         background: "#f6f8fa",
         borderRadius: 8,
-        padding: 12,
         fontFamily: "monospace"
       }}>
-        <div style={{ fontWeight: "bold" }}>Código</div>
-        <div style={{ fontWeight: "bold" }}>Última validación</div>
-        <div style={{ fontWeight: "bold" }}>Usos restantes</div>
-        <div style={{ fontWeight: "bold" }}>Activo</div>
+        <div style={{ fontWeight: "bold", padding: 12, borderBottom: "2px solid #e5e7eb" }}>Código</div>
+        <div style={{ fontWeight: "bold", padding: 12, borderBottom: "2px solid #e5e7eb" }}>Última validación</div>
+        <div style={{ fontWeight: "bold", padding: 12, borderBottom: "2px solid #e5e7eb" }}>Usos restantes</div>
+        <div style={{ fontWeight: "bold", padding: 12, borderBottom: "2px solid #e5e7eb" }}>Estado</div>
         {batch.codes.length === 0 && (
-          <div style={{ gridColumn: "1 / span 4" }}>No hay tarjetas activas</div>
+          <div style={{ gridColumn: "1 / span 4", padding: 12 }}>No hay tarjetas activas</div>
         )}
-        {batch.codes.map(card => (
+        {batch.codes.map((card, idx) => (
           <React.Fragment key={card.id}>
-            <div>{card.code}</div>
-            <div>{card.lastValidated ? new Date(card.lastValidated).toLocaleString() : "Nunca"}</div>
-            <div>
-              {card.uses === null ? "∞" : card.uses}
-              <button
-                onClick={() => decrementUses(card)}
-                disabled={updating === card.id || !card.active || (card.uses !== null && card.uses <= 0)}
-                style={{ marginLeft: 8, padding: "2px 8px", borderRadius: 4, border: "1px solid #ccc", background: "#fff" }}
-                title="Restar uso"
-              >
-                -1
-              </button>
+            <div style={{ padding: 12, borderBottom: "1px solid #e5e7eb" }}>{card.code}</div>
+            <div style={{ padding: 12, borderBottom: "1px solid #e5e7eb" }}>{card.lastValidated ? new Date(card.lastValidated).toLocaleString() : "Nunca"}</div>
+            <div style={{ padding: 12, borderBottom: "1px solid #e5e7eb" }}>
+              {card.uses === null ? (
+                <span title="Ilimitado">∞</span>
+              ) : (
+                <input
+                  type="number"
+                  min={0}
+                  value={editUses[card.id] !== undefined ? editUses[card.id] : card.uses}
+                  onChange={e => handleUsesChange(card, e.target.value)}
+                  onBlur={() => handleUsesBlur(card)}
+                  disabled={updating === card.id}
+                  style={{ width: 60, textAlign: "right", fontFamily: "monospace", border: "1px solid #ccc", borderRadius: 4, padding: "2px 4px" }}
+                />
+              )}
             </div>
-            <div>
-              <input
-                type="checkbox"
-                checked={card.active}
-                onChange={() => toggleActive(card)}
-                disabled={updating === card.id}
-              />
+            <div style={{ padding: 12, borderBottom: "1px solid #e5e7eb", textAlign: "center", cursor: "pointer" }}
+              onClick={() => toggleActive(card)}
+              title={card.active ? "Desactivar" : "Activar"}
+            >
+              {card.active ? <span style={{ fontSize: 20 }}>✅</span> : <span style={{ fontSize: 20 }}>❌</span>}
             </div>
           </React.Fragment>
         ))}
