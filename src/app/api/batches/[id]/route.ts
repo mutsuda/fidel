@@ -34,7 +34,9 @@ export async function GET(request: NextRequest) {
     const cards = batch.codes.map(card => ({
       id: card.id,
       code: card.code,
-      lastValidated: card.scans[0]?.scannedAt || null
+      lastValidated: card.scans[0]?.scannedAt || null,
+      active: card.active,
+      uses: card.uses
     }));
     return NextResponse.json({
       ...batch,
