@@ -121,7 +121,7 @@ export default function BatchDetailPage() {
                 <input
                   type="number"
                   min={0}
-                  value={editUses[card.id] !== undefined ? editUses[card.id] : card.uses}
+                  value={editUses[card.id] !== undefined ? editUses[card.id] : (card.uses ?? 0)}
                   onChange={e => handleUsesChange(card, e.target.value)}
                   onBlur={() => handleUsesBlur(card)}
                   disabled={updating === card.id}

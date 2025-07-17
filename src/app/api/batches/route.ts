@@ -79,7 +79,8 @@ export async function POST(request: NextRequest) {
           hash,
           number: i,
           batchId: batch.id,
-          uses: (typeof initialUses === 'number' && initialUses >= 0) ? initialUses : null
+          uses: (typeof initialUses === 'number' && initialUses >= 0) ? initialUses : null,
+          active: true
         }
       });
       codes.push({ code, hash, number: i });
