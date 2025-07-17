@@ -9,8 +9,8 @@ function getIdFromRequest(request: NextRequest) {
   const { pathname } = new URL(request.url);
   const segments = pathname.split("/");
   console.log("[DEBUG] Original API path segments:", segments);
-  // /api/batches/[id] => [id] es el penúltimo segmento
-  const id = segments.at(-2) || "";
+  // /api/batches/[id] => [id] es el último segmento
+  const id = segments.at(-1) || "";
   console.log("[DEBUG] Original API extracted ID:", id);
   return id;
 }
