@@ -7,17 +7,20 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
+    // Obtener todos los batches y contar las tarjetas asociadas
     const batches = await prisma.batch.findMany({
       include: {
-        template: true
+        template: true,
+        _count: { select: { codes: true } }
       },
       orderBy: {
         createdAt: 'desc'
       }
     });
-    // Agregar codes: [] a cada batch para evitar errores en el frontend
+    // Agregar codesCount a cada batch
     const batchesWithCodes = batches.map(batch => ({
       ...batch,
+      codesCount: batch._count.codes,
       codes: []
     }));
     return NextResponse.json(batchesWithCodes);

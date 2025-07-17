@@ -11,6 +11,7 @@ interface Batch {
   description?: string;
   quantity: number;
   createdAt: string;
+  codesCount?: number;
   codes: Code[];
 }
 
@@ -109,7 +110,7 @@ export default function BatchesPage() {
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">{batch.name}</h3>
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    {batch.codes.length} tarjetas
+                    {(typeof batch.codesCount === 'number' ? batch.codesCount : batch.codes.length)} tarjetas
                   </span>
                 </div>
                 
