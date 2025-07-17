@@ -45,6 +45,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, description, quantity, templateId, initialUses } = body;
 
+    console.log("[DEBUG] Creating batch", { 
+      userId: session.user.id, 
+      name, 
+      quantity, 
+      templateId 
+    });
+
     if (!name || !quantity || !templateId) {
       return NextResponse.json({ error: "Nombre, cantidad y plantilla son requeridos" }, { status: 400 });
     }
@@ -52,6 +59,14 @@ export async function POST(request: NextRequest) {
     if (quantity < 1 || quantity > 10000) {
       return NextResponse.json({ error: "La cantidad debe estar entre 1 y 10,000" }, { status: 400 });
     }
+
+    // Verificar que el usuario existe en la BD
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    });
+    console.log("[DEBUG] User in DB", { 
+      user: user ? { id: user.id, email: user.email } : null 
+    });
 
     // Crear el lote en la base de datos
     const batch = await prisma.batch.create({
@@ -65,6 +80,11 @@ export async function POST(request: NextRequest) {
       include: {
         template: true
       }
+    });
+
+    console.log("[DEBUG] Batch created", { 
+      batchId: batch.id, 
+      userId: batch.userId 
     });
 
     // Generar códigos para el lote
