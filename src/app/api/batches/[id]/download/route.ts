@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
     const batchId = pathname.split("/").at(-2);
     if (!batchId) return NextResponse.json({ error: "BatchId requerido" }, { status: 400 });
 
+    console.log("[DEBUG] Download PDF", { batchId, userId: session.user.id });
+
     // Obtener batch, plantilla y tarjetas SOLO del usuario autenticado
     const batch = await prisma.batch.findFirst({
       where: { id: batchId, userId: session.user.id },
@@ -38,13 +40,30 @@ export async function GET(request: NextRequest) {
         codes: true
       }
     });
+    
+    console.log("[DEBUG] Batch for PDF", { 
+      batch: batch ? { id: batch.id, userId: batch.userId } : null,
+      template: batch?.template ? { id: batch.template.id, hasImageUrl: !!batch.template.imageUrl } : null
+    });
+    
     if (!batch) return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
     if (!batch.template) return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
 
     // Cargar imagen de plantilla (base64 data URL)
     const imageUrl = batch.template.imageUrl;
+    console.log("[DEBUG] Image URL", { 
+      imageUrlLength: imageUrl?.length,
+      imageUrlStart: imageUrl?.substring(0, 50),
+      isDataUrl: imageUrl?.startsWith('data:')
+    });
+    
     const base64 = imageUrl.split(",")[1];
     const imageBytes = Buffer.from(base64, "base64");
+    
+    console.log("[DEBUG] Image bytes", { 
+      imageBytesLength: imageBytes.length,
+      base64Length: base64.length
+    });
 
     // Crear PDF
     const pdfDoc = await PDFDocument.create();

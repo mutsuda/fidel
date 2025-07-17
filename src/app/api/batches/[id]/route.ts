@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
   }
   try {
     const id = getIdFromRequest(request);
+    console.log("[DEBUG] GET batch", { batchId: id, userId: session.user.id });
+    
     const batch = await prisma.batch.findFirst({
       where: { id, userId: session.user.id },
       include: {
@@ -33,6 +35,9 @@ export async function GET(request: NextRequest) {
         }
       }
     });
+    
+    console.log("[DEBUG] Batch found", { batch: batch ? { id: batch.id, userId: batch.userId } : null });
+    
     if (!batch) {
       return NextResponse.json({ error: "Batch no encontrado" }, { status: 404 });
     }
