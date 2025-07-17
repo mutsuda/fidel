@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // Generar códigos para el lote
     const codes = [];
     for (let i = 1; i <= quantity; i++) {
-      const code = generateCode(i);
+      const code = generateCode(batch.id, i);
       const hash = crypto.randomBytes(32).toString('hex');
       
       await prisma.code.create({
@@ -89,18 +89,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateCode(number: number): string {
-  // Generar código alfanumérico de 6 caracteres
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "";
-  
-  // Asegurar que el código sea único basado en el número
-  const seed = number * 12345; // Número mágico para variación
-  
-  for (let i = 0; i < 6; i++) {
-    const index = (seed + i * 7) % chars.length;
-    code += chars[index];
-  }
-  
-  return code;
+function generateCode(batchId: string, number: number): string {
+  // Usa un hash del batchId y el número para generar un código único de 6 caracteres
+  const base = batchId + number;
+  const hash = crypto.createHash('sha256').update(base).digest('hex');
+  // Solo letras y números, 6 caracteres
+  return hash.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
 } 
