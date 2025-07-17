@@ -87,6 +87,13 @@ export async function POST(request: NextRequest) {
       userId: batch.userId 
     });
 
+    // Listar todos los batches del usuario
+    const allBatches = await prisma.batch.findMany({
+      where: { userId: session.user.id },
+      select: { id: true, name: true, createdAt: true }
+    });
+    console.log("[DEBUG] All batches for user", { userId: session.user.id, batches: allBatches });
+
     // Generar códigos para el lote
     const codes = [];
     for (let i = 1; i <= quantity; i++) {
