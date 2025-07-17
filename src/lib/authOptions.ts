@@ -69,11 +69,15 @@ const authOptions: AuthOptions = {
     },
     async signIn({ user, account, profile, email, credentials }) {
       console.log("[DEBUG] signIn callback", { user, account, profile, email, credentials });
-      try {
-        const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
-        console.log("[DEBUG] signIn prisma.user.findUnique", { dbUser });
-      } catch (err) {
-        console.error("[DEBUG] signIn prisma.user.findUnique ERROR", err);
+      if (!user.email) {
+        console.error("[DEBUG] signIn: user.email is missing", { user });
+      } else {
+        try {
+          const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+          console.log("[DEBUG] signIn prisma.user.findUnique", { dbUser });
+        } catch (err) {
+          console.error("[DEBUG] signIn prisma.user.findUnique ERROR", err);
+        }
       }
       return true;
     },
