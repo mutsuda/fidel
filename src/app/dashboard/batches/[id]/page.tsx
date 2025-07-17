@@ -31,7 +31,7 @@ export default function BatchDetailPage() {
   useEffect(() => {
     if (!batchId) return;
     setLoading(true);
-    fetch(`/api/batches/${batchId}`)
+    fetch(`/api/batches/${batchId}/simple-with-codes`)
       .then(res => res.json())
       .then(data => {
         if (data.error) setError(data.error);
