@@ -24,20 +24,32 @@ export async function GET(request: NextRequest) {
     
     console.log("[DEBUG] Starting complex query for batch:", id);
     
+    // Primera consulta: obtener batch con template
     const batch = await prisma.batch.findFirst({
       where: { id, userId },
       include: {
         template: true,
-        codes: {
-          include: {
-            scans: {
-              orderBy: { scannedAt: "desc" },
-              take: 1 // Solo la última validación
-            }
-          }
-        }
+        codes: true // Solo códigos básicos, sin scans
       }
     });
+    
+    if (!batch) {
+      return NextResponse.json({ error: "Batch no encontrado", batchId: id, userId }, { status: 404 });
+    }
+    
+    // Segunda consulta: obtener scans para cada código (opcional, más eficiente)
+    const codesWithScans = await Promise.all(
+      batch.codes.map(async (code: any) => {
+        const lastScan = await prisma.scan.findFirst({
+          where: { codeId: code.id },
+          orderBy: { scannedAt: "desc" }
+        });
+        return {
+          ...code,
+          lastValidated: lastScan?.scannedAt || null
+        };
+      })
+    );
     
     console.log("[DEBUG] Batch found - exists:", !!batch, "batchUserId:", batch?.userId);
     console.log("[DEBUG] Batch codes count:", batch?.codes?.length || 0);
@@ -46,11 +58,11 @@ export async function GET(request: NextRequest) {
     if (!batch) {
       return NextResponse.json({ error: "Batch no encontrado", batchId: id, userId }, { status: 404 });
     }
-    // Formatear tarjetas para mostrar solo id, code, última validación, active, uses
-    const cards = batch.codes.map((card: any) => ({
+    // Formatear tarjetas usando codesWithScans
+    const cards = codesWithScans.map((card: any) => ({
       id: card.id,
       code: card.code,
-      lastValidated: card.scans[0]?.scannedAt || null,
+      lastValidated: card.lastValidated,
       active: card.active,
       uses: card.uses
     }));
