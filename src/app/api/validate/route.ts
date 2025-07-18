@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const { hash } = await request.json();
     if (!hash) return NextResponse.json({ ok: false, error: "Hash requerido" }, { status: 400 });
+    
     // Buscar tarjeta por hash
     const card = await prisma.code.findUnique({
       where: { hash },
@@ -15,9 +16,23 @@ export async function POST(request: NextRequest) {
         batch: { include: { template: true } }
       }
     });
+    
     if (!card) return NextResponse.json({ ok: false, error: "Tarjeta no encontrada" }, { status: 404 });
     if (!card.active) return NextResponse.json({ ok: false, error: "Tarjeta inactiva" }, { status: 403 });
     if (card.uses !== null && card.uses <= 0) return NextResponse.json({ ok: false, error: "Sin consumiciones" }, { status: 403 });
+    
+    // Registrar el scan
+    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
+    
+    await prisma.scan.create({
+      data: {
+        codeId: card.id,
+        ipAddress,
+        userAgent
+      }
+    });
+    
     // OK
     return NextResponse.json({
       ok: true,
@@ -38,6 +53,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
+    console.error("Error validating QR:", error);
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
   }
 }
