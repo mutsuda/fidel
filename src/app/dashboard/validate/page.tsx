@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 
-const QrReader = dynamic(() => import("@blackbox-vision/react-qr-reader").then(m => m.QrReader), { ssr: false });
+let Html5Qrcode;
+if (typeof window !== "undefined") {
+  Html5Qrcode = require("html5-qrcode").Html5Qrcode;
+}
 
 export default function ValidatePage() {
   const [input, setInput] = useState("");
@@ -12,6 +15,40 @@ export default function ValidatePage() {
   const [error, setError] = useState<string | null>(null);
   const [uses, setUses] = useState<number | null>(null);
   const [showCamera, setShowCamera] = useState(true);
+  const [cameraReady, setCameraReady] = useState(false);
+  const html5QrRef = useRef<any>(null);
+  const qrRegionId = "qr-reader-region";
+
+  useEffect(() => {
+    if (!showCamera) return;
+    let qr;
+    if (typeof window !== "undefined" && Html5Qrcode) {
+      qr = new Html5Qrcode(qrRegionId);
+      html5QrRef.current = qr;
+      qr.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1,
+        },
+        (decodedText: string) => {
+          if (!loading) {
+            setShowCamera(false);
+            setInput(decodedText);
+            handleValidate(decodedText);
+            qr.stop();
+          }
+        },
+        (err: any) => {}
+      ).then(() => setCameraReady(true)).catch(() => setCameraReady(false));
+    }
+    return () => {
+      if (qr) qr.stop().catch(() => {});
+      setCameraReady(false);
+    };
+    // eslint-disable-next-line
+  }, [showCamera]);
 
   const handleValidate = async (hash?: string) => {
     setLoading(true);
@@ -73,21 +110,10 @@ export default function ValidatePage() {
             <p className="mb-4 text-gray-700 text-center">Escanea el QR de una tarjeta o pega el código aquí.</p>
             {showCamera && (
               <div className="w-full flex flex-col items-center mb-4">
-                <div className="w-64 h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400 mb-2 overflow-hidden">
-                  <QrReader
-                    constraints={{ facingMode: "environment" }}
-                    onResult={(res, err) => {
-                      if (res?.text && !loading) {
-                        setShowCamera(false);
-                        setInput(res.text);
-                        handleValidate(res.text);
-                      }
-                    }}
-                    containerStyle={{ width: "100%", height: "100%" }}
-                  />
-                </div>
+                <div id={qrRegionId} className="w-64 h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400 mb-2 overflow-hidden border-4 border-blue-300 shadow-inner" />
+                {!cameraReady && <div className="text-gray-500 text-sm mt-2">Cargando cámara...</div>}
                 <button
-                  className="text-blue-600 underline text-sm"
+                  className="text-blue-600 underline text-sm mt-2"
                   onClick={() => setShowCamera(false)}
                 >
                   Usar input manual
