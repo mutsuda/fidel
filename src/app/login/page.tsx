@@ -1,12 +1,37 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
+
+  // Si ya está autenticado, redirigir a home
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
+
+  // Si está cargando, mostrar loading
+  if (status === "loading") {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </main>
+    );
+  }
+
+  // Si ya está autenticado, no mostrar nada (se está redirigiendo)
+  if (status === "authenticated") {
+    return null;
+  }
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
