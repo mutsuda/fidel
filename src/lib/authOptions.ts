@@ -47,6 +47,7 @@ const authOptions: AuthOptions = {
   },
   pages: {
     signIn: "/login",
+    signOut: "/login",
   },
   callbacks: {
     async signIn({ user, account, profile }) {
