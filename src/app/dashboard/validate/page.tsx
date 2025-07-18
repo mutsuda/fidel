@@ -37,14 +37,18 @@ export default function ValidatePage() {
             setShowCamera(false);
             setInput(decodedText);
             handleValidate(decodedText);
-            qr.stop();
+            if (qr && typeof qr.stop === "function") {
+              try { qr.stop(); } catch {}
+            }
           }
         },
         (err: any) => {}
       ).then(() => setCameraReady(true)).catch(() => setCameraReady(false));
     }
     return () => {
-      if (qr) qr.stop().catch(() => {});
+      if (qr && typeof qr.stop === "function") {
+        try { qr.stop(); } catch {}
+      }
       setCameraReady(false);
     };
     // eslint-disable-next-line
