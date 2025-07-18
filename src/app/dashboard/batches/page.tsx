@@ -160,26 +160,28 @@ export default function BatchesPage() {
                   Creado: {new Date(batch.createdAt).toLocaleDateString()}
                 </div>
                 
-                <div className="flex space-x-2">
-                  <Link
-                    href={`/dashboard/batches/${batch.id}`}
-                    className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition text-center"
-                  >
-                    Ver Detalles
-                  </Link>
-                  <Link
-                    href={`/api/batches/${batch.id}/download`}
-                    className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition text-center"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Descargar
-                  </Link>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex space-x-2">
+                    <Link
+                      href={`/dashboard/batches/${batch.id}`}
+                      className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition text-center"
+                    >
+                      Ver Detalles
+                    </Link>
+                    <Link
+                      href={`/api/batches/${batch.id}/download`}
+                      className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition text-center"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Descargar
+                    </Link>
+                  </div>
                   <button
                     onClick={() => handleDeleteBatch(batch.id, batch.name)}
-                    className="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 transition"
+                    className="text-red-600 text-sm hover:text-red-800 transition text-center underline"
                   >
-                    Eliminar
+                    Eliminar lote
                   </button>
                 </div>
               </div>
