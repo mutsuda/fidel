@@ -88,25 +88,23 @@ export async function DELETE(request: NextRequest) {
   }
   try {
     const id = getIdFromRequest(request);
-    const { searchParams } = new URL(request.url);
-    const cardId = searchParams.get("cardId");
-    if (!cardId) {
-      return NextResponse.json({ error: "cardId requerido" }, { status: 400 });
+    const userId = session.user.id;
+    // Verificar que el lote es del usuario
+    const batch = await prisma.batch.findFirst({ where: { id, userId } });
+    if (!batch) {
+      return NextResponse.json({ error: "Lote no encontrado o no autorizado" }, { status: 404 });
     }
-    // Solo permitir borrar tarjetas del usuario
-    const card = await prisma.code.findFirst({
-      where: {
-        id: cardId,
-        batch: { userId: session.user.id }
-      }
-    });
-    if (!card) {
-      return NextResponse.json({ error: "Tarjeta no encontrada o no autorizada" }, { status: 404 });
-    }
-    await prisma.code.delete({ where: { id: cardId } });
+    // Eliminar todos los scans de las tarjetas del lote
+    const codes = await prisma.code.findMany({ where: { batchId: id } });
+    const codeIds = codes.map((c: { id: string }) => c.id);
+    await prisma.scan.deleteMany({ where: { codeId: { in: codeIds } } });
+    // Eliminar las tarjetas
+    await prisma.code.deleteMany({ where: { batchId: id } });
+    // Eliminar el lote
+    await prisma.batch.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error revocando tarjeta:", error);
+    console.error("Error eliminando lote:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
