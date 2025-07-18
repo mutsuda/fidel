@@ -18,7 +18,7 @@ interface ValidationResult {
 
 export default function ValidatePage() {
   const [input, setInput] = useState("");
-  const [results, setResults] = useState<ValidationResult[]>([]);
+  const [currentResult, setCurrentResult] = useState<ValidationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [showCamera, setShowCamera] = useState(true);
   const [cameraReady, setCameraReady] = useState(false);
@@ -70,29 +70,29 @@ export default function ValidatePage() {
       });
       const data = await res.json();
       if (!data.ok) {
-        // Añadir resultado de error a la lista
-        setResults(prev => [...prev, {
+        // Mostrar solo el resultado más reciente
+        setCurrentResult({
           id: Date.now(),
           type: 'error',
           message: data.error || "No válida",
           timestamp: new Date()
-        }]);
+        });
       } else {
-        // Añadir resultado exitoso a la lista
-        setResults(prev => [...prev, {
+        // Mostrar solo el resultado más reciente
+        setCurrentResult({
           id: Date.now(),
           type: 'success',
           card: data.card,
           timestamp: new Date()
-        }]);
+        });
       }
     } catch {
-      setResults(prev => [...prev, {
+      setCurrentResult({
         id: Date.now(),
         type: 'error',
         message: "Error de red",
         timestamp: new Date()
-      }]);
+      });
     }
     setLoading(false);
   };
@@ -106,13 +106,12 @@ export default function ValidatePage() {
         body: JSON.stringify({ cardId, action })
       });
       const data = await res.json();
-      if (data.ok) {
-        // Actualizar el resultado en la lista
-        setResults(prev => prev.map(result => 
-          result.type === 'success' && result.card?.id === cardId 
-            ? { ...result, card: { ...result.card, uses: data.uses } }
-            : result
-        ));
+      if (data.ok && currentResult?.type === 'success' && currentResult.card?.id === cardId) {
+        // Actualizar el resultado actual
+        setCurrentResult({
+          ...currentResult,
+          card: { ...currentResult.card, uses: data.uses }
+        });
       }
     } catch {
       // Error silencioso para no interrumpir el flujo
@@ -120,8 +119,8 @@ export default function ValidatePage() {
     setLoading(false);
   };
 
-  const clearResults = () => {
-    setResults([]);
+  const clearResult = () => {
+    setCurrentResult(null);
     lastScannedRef.current = "";
   };
 
@@ -176,67 +175,65 @@ export default function ValidatePage() {
             )}
             
             <button
-              onClick={clearResults}
+              onClick={clearResult}
               className="w-full py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 transition"
             >
-              Limpiar historial
+              Limpiar resultado
             </button>
           </div>
 
-          {/* Panel derecho - Resultados */}
+          {/* Panel derecho - Resultado actual */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">Resultados</h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {results.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">Escanea una tarjeta para ver los resultados</p>
+            <h3 className="text-xl font-bold mb-4 text-gray-900">Última tarjeta escaneada</h3>
+            <div className="min-h-64">
+              {!currentResult ? (
+                <p className="text-gray-500 text-center py-8">Escanea una tarjeta para ver el resultado</p>
               ) : (
-                results.map((result) => (
-                  <div key={result.id} className={`border rounded-lg p-4 ${result.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{result.type === 'success' ? '✅' : '❌'}</span>
-                        <span className={`font-semibold ${result.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
-                          {result.type === 'success' ? 'Válida' : 'No válida'}
-                        </span>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {result.timestamp.toLocaleTimeString()}
+                <div className={`border rounded-lg p-4 ${currentResult.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{currentResult.type === 'success' ? '✅' : '❌'}</span>
+                      <span className={`font-semibold ${currentResult.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                        {currentResult.type === 'success' ? 'Válida' : 'No válida'}
                       </span>
                     </div>
-                    
-                    {result.type === 'success' && result.card && (
-                      <div className="space-y-2">
-                        <div className="font-mono text-lg">{result.card.code}</div>
-                        <div className="text-sm text-gray-700">Lote: <b>{result.card.batch.name}</b></div>
-                        <div className="text-sm text-gray-700">Estado: <b>{result.card.active ? "Activa" : "Inactiva"}</b></div>
-                        <div className="text-sm text-gray-700">Usos: <b>{result.card.uses === null ? "∞" : result.card.uses}</b></div>
-                        
-                        {result.card.uses !== null && (
-                          <div className="flex gap-2 mt-3">
-                            <button
-                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                              onClick={() => handleAction(result.card.id, "sub")}
-                              disabled={loading || result.card.uses === 0}
-                            >
-                              -1
-                            </button>
-                            <button
-                              className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-300"
-                              onClick={() => handleAction(result.card.id, "add")}
-                              disabled={loading}
-                            >
-                              +1
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {result.type === 'error' && (
-                      <div className="text-sm text-red-700">{result.message}</div>
-                    )}
+                    <span className="text-xs text-gray-500">
+                      {currentResult.timestamp.toLocaleTimeString()}
+                    </span>
                   </div>
-                ))
+                  
+                  {currentResult.type === 'success' && currentResult.card && (
+                    <div className="space-y-2">
+                      <div className="font-mono text-lg">{currentResult.card.code}</div>
+                      <div className="text-sm text-gray-700">Lote: <b>{currentResult.card.batch.name}</b></div>
+                      <div className="text-sm text-gray-700">Estado: <b>{currentResult.card.active ? "Activa" : "Inactiva"}</b></div>
+                      <div className="text-sm text-gray-700">Usos: <b>{currentResult.card.uses === null ? "∞" : currentResult.card.uses}</b></div>
+                      
+                      {currentResult.card.uses !== null && (
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                            onClick={() => handleAction(currentResult.card.id, "sub")}
+                            disabled={loading || currentResult.card.uses === 0}
+                          >
+                            -1
+                          </button>
+                          <button
+                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-300"
+                            onClick={() => handleAction(currentResult.card.id, "add")}
+                            disabled={loading}
+                          >
+                            +1
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {currentResult.type === 'error' && (
+                    <div className="text-sm text-red-700">{currentResult.message}</div>
+                  )}
+                </div>
               )}
             </div>
           </div>
