@@ -13,6 +13,11 @@ interface Batch {
   createdAt: string;
   codesCount?: number;
   codes: Code[];
+  template?: {
+    id: string;
+    name: string;
+    imageUrl: string;
+  };
 }
 
 interface Code {
@@ -107,6 +112,16 @@ export default function BatchesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {batches.map((batch) => (
               <div key={batch.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition">
+                {/* Imagen de la plantilla */}
+                {batch.template?.imageUrl && (
+                  <div className="aspect-w-16 aspect-h-9 bg-gray-100 mb-4 rounded overflow-hidden flex items-center justify-center">
+                    <img
+                      src={batch.template.imageUrl}
+                      alt={batch.template.name || "Plantilla"}
+                      className="object-contain w-full h-32"
+                    />
+                  </div>
+                )}
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">{batch.name}</h3>
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
