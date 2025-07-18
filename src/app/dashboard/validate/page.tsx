@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 
-let Html5Qrcode;
+let Html5Qrcode: any;
 if (typeof window !== "undefined") {
   Html5Qrcode = require("html5-qrcode").Html5Qrcode;
 }
@@ -21,7 +21,7 @@ export default function ValidatePage() {
 
   useEffect(() => {
     if (!showCamera) return;
-    let qr;
+    let qr: any;
     if (typeof window !== "undefined" && Html5Qrcode) {
       qr = new Html5Qrcode(qrRegionId);
       html5QrRef.current = qr;
