@@ -58,6 +58,29 @@ export default function BatchesPage() {
     }
   };
 
+  const handleDeleteBatch = async (batchId: string, batchName: string) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el lote "${batchName}"? Esta acción eliminará todas las tarjetas asociadas y no se puede deshacer.`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/batches/${batchId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        // Refrescar la lista
+        fetchBatches();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'No se pudo eliminar el lote'}`);
+      }
+    } catch (error) {
+      console.error("Error deleting batch:", error);
+      alert('Error al eliminar el lote');
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
@@ -152,6 +175,12 @@ export default function BatchesPage() {
                   >
                     Descargar
                   </Link>
+                  <button
+                    onClick={() => handleDeleteBatch(batch.id, batch.name)}
+                    className="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 transition"
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
             ))}

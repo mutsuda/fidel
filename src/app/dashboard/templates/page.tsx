@@ -44,6 +44,29 @@ export default function TemplatesPage() {
     }
   };
 
+  const handleDeleteTemplate = async (templateId: string, templateName: string) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar la plantilla "${templateName}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/templates/${templateId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        // Refrescar la lista
+        fetchTemplates();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'No se pudo eliminar la plantilla'}`);
+      }
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      alert('Error al eliminar la plantilla');
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
@@ -124,11 +147,7 @@ export default function TemplatesPage() {
                       Ver Detalles
                     </Link>
                     <button
-                      onClick={() => {
-                        if (confirm("¿Estás seguro de que quieres eliminar esta plantilla?")) {
-                          // TODO: Implementar eliminación
-                        }
-                      }}
+                      onClick={() => handleDeleteTemplate(template.id, template.name)}
                       className="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 transition"
                     >
                       Eliminar
