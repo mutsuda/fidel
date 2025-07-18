@@ -23,24 +23,6 @@ const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        // Para el MVP, permitimos login con cualquier email
-        if (credentials?.email) {
-          return {
-            id: "1",
-            email: credentials.email,
-            name: credentials.email.split("@")[0],
-          };
-        }
-        return null;
-      }
-    }),
   ],
   session: {
     strategy: "jwt" as SessionStrategy,
