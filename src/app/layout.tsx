@@ -3,6 +3,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import Navbar from "./Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({
       </head>
       <body className="bg-gray-50 font-sans text-gray-900">
         <SessionProvider>
+          <Navbar />
           {children}
         </SessionProvider>
       </body>
