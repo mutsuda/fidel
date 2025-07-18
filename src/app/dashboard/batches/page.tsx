@@ -134,56 +134,61 @@ export default function BatchesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {batches.map((batch) => (
-              <div key={batch.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition">
-                {/* Imagen de la plantilla */}
-                {batch.template?.imageUrl && (
-                  <div className="aspect-w-16 aspect-h-9 bg-gray-100 mb-4 rounded overflow-hidden flex items-center justify-center">
-                    <img
-                      src={batch.template.imageUrl}
-                      alt={batch.template.name || "Plantilla"}
-                      className="object-contain w-full h-32"
-                    />
-                  </div>
-                )}
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">{batch.name}</h3>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    {(typeof batch.codesCount === 'number' ? batch.codesCount : batch.codes.length)} tarjetas
-                  </span>
-                </div>
-                
-                {batch.description && (
-                  <p className="text-gray-600 text-sm mb-4">{batch.description}</p>
-                )}
-                
-                <div className="text-sm text-gray-500 mb-4">
-                  Creado: {new Date(batch.createdAt).toLocaleDateString()}
-                </div>
-                
-                <div className="flex flex-col space-y-2">
-                  <div className="flex space-x-2">
-                    <Link
-                      href={`/dashboard/batches/${batch.id}`}
-                      className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition text-center"
-                    >
-                      Ver Detalles
-                    </Link>
-                    <Link
-                      href={`/api/batches/${batch.id}/download`}
-                      className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition text-center"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Descargar
-                    </Link>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteBatch(batch.id, batch.name)}
-                    className="text-red-600 text-sm hover:text-red-800 transition text-center underline"
+              <div key={batch.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition relative group">
+                {/* Iconos de acción en esquina superior derecha */}
+                <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Link
+                    href={`/api/batches/${batch.id}/download`}
+                    className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Descargar PDF"
                   >
-                    Eliminar lote
+                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </Link>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteBatch(batch.id, batch.name);
+                    }}
+                    className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition"
+                    title="Eliminar lote"
+                  >
+                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
                 </div>
+
+                {/* Contenido clickeable */}
+                <Link href={`/dashboard/batches/${batch.id}`} className="block">
+                  {/* Imagen de la plantilla */}
+                  {batch.template?.imageUrl && (
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-100 mb-4 rounded overflow-hidden flex items-center justify-center">
+                      <img
+                        src={batch.template.imageUrl}
+                        alt={batch.template.name || "Plantilla"}
+                        className="object-contain w-full h-32"
+                      />
+                    </div>
+                  )}
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">{batch.name}</h3>
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                      {(typeof batch.codesCount === 'number' ? batch.codesCount : batch.codes.length)} tarjetas
+                    </span>
+                  </div>
+                  
+                  {batch.description && (
+                    <p className="text-gray-600 text-sm mb-4">{batch.description}</p>
+                  )}
+                  
+                  <div className="text-sm text-gray-500">
+                    Creado: {new Date(batch.createdAt).toLocaleDateString()}
+                  </div>
+                </Link>
               </div>
             ))}
           </div>
