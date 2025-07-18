@@ -20,6 +20,7 @@ export default function Navbar() {
           <Link href="/dashboard/batches" className="text-gray-700 hover:text-blue-700 font-medium transition">Lotes</Link>
           <Link href="/dashboard/templates" className="text-gray-700 hover:text-blue-700 font-medium transition">Plantillas</Link>
           <Link href="/dashboard/validate" className="text-gray-700 hover:text-blue-700 font-medium transition">Validar QR</Link>
+          <Link href="/dashboard/pricing" className="text-gray-700 hover:text-blue-700 font-medium transition">Planes</Link>
           
           {/* Profile Menu */}
           <div className="relative">
@@ -41,6 +42,13 @@ export default function Navbar() {
                 <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
                   {session?.user?.email}
                 </div>
+                <Link
+                  href="/dashboard/pricing"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  onClick={() => setShowProfileMenu(false)}
+                >
+                  Ver Planes
+                </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
