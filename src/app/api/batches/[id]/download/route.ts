@@ -67,7 +67,14 @@ export async function GET(request: NextRequest) {
 
     // Crear PDF
     const pdfDoc = await PDFDocument.create();
-    const image = await pdfDoc.embedPng(imageBytes);
+    let image;
+    if (imageUrl.startsWith("data:image/png")) {
+      image = await pdfDoc.embedPng(imageBytes);
+    } else if (imageUrl.startsWith("data:image/jpeg") || imageUrl.startsWith("data:image/jpg")) {
+      image = await pdfDoc.embedJpg(imageBytes);
+    } else {
+      return NextResponse.json({ error: "La plantilla debe ser PNG o JPG" }, { status: 400 });
+    }
 
     for (let i = 0; i < batch.codes.length; i += CARDS_PER_PAGE) {
       const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
