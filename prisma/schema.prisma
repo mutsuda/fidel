@@ -22,9 +22,6 @@ model User {
   createdAt DateTime @default(now())
   batches   Batch[]
   templates Template[]
-  subscriptions Subscription[]
-  payments  Payment[]
-  customerId String? // Stripe Customer ID
 }
 
 model Template {
@@ -49,8 +46,6 @@ model Batch {
   userId      String
   createdAt   DateTime @default(now())
   codes       Code[]
-  paid        Boolean  @default(false) // Si el lote ha sido pagado
-  paymentId   String?  // ID del pago asociado
 }
 
 model Code {
@@ -73,83 +68,4 @@ model Scan {
   ipAddress String?
   userAgent String?
   scannedAt DateTime @default(now())
-}
-
-// Modelos para el sistema de pagos
-model PricingPlan {
-  id          String   @id @default(cuid())
-  name        String   // ej: "Básico", "Pro", "Empresa"
-  description String?
-  type        PlanType // SUBSCRIPTION o ONE_TIME
-  price       Float    // Precio en euros (o tu moneda)
-  currency    String   @default("EUR")
-  features    Json     // Array de características ["Hasta 100 tarjetas", "Soporte básico"]
-  maxBatches  Int?     // Límite de lotes (null = ilimitado)
-  maxCards    Int?     // Límite de tarjetas (null = ilimitado)
-  duration    Int?     // Duración en días (para suscripciones)
-  active      Boolean  @default(true)
-  stripeProductId String? // ID del producto en Stripe
-  stripePriceId   String? // ID del precio en Stripe
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  subscriptions Subscription[]
-  payments      Payment[]
-}
-
-model Subscription {
-  id          String      @id @default(cuid())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
-  plan        PricingPlan @relation(fields: [planId], references: [id])
-  planId      String
-  status      SubStatus   @default(ACTIVE)
-  startDate   DateTime    @default(now())
-  endDate     DateTime?   // null para suscripciones indefinidas
-  stripeSubscriptionId String? // ID de la suscripción en Stripe
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-model Payment {
-  id          String      @id @default(cuid())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
-  plan        PricingPlan? @relation(fields: [planId], references: [id])
-  planId      String?
-  amount      Float       // Cantidad pagada
-  currency    String      @default("EUR")
-  status      PayStatus   @default(PENDING)
-  type        PaymentType // SUBSCRIPTION o ONE_TIME
-  stripePaymentIntentId String? // ID del pago en Stripe
-  stripeSessionId       String? // ID de la sesión de checkout
-  description String?     // Descripción del pago
-  metadata    Json?       // Datos adicionales
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-// Enums
-enum PlanType {
-  SUBSCRIPTION
-  ONE_TIME
-}
-
-enum SubStatus {
-  ACTIVE
-  CANCELED
-  EXPIRED
-  PAUSED
-}
-
-enum PayStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-enum PaymentType {
-  SUBSCRIPTION
-  ONE_TIME
-  BATCH_PAYMENT
 }
