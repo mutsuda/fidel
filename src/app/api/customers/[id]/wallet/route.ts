@@ -5,17 +5,16 @@ import authOptions from "@/lib/authOptions";
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
   try {
-    const customerId = params.id;
+    const { pathname } = new URL(request.url);
+    const segments = pathname.split("/");
+    const customerId = segments.at(-2) || ""; // El ID está en la posición -2 para /api/customers/[id]/wallet
 
     // Buscar el cliente y su tarjeta
     const customer = await prisma.customer.findFirst({
