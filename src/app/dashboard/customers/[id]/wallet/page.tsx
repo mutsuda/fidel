@@ -84,7 +84,11 @@ export default function CustomerWalletPage() {
       if (response.ok) {
         const data = await response.json();
         setWalletData(data);
-        generateQRCode(data.card.hash);
+        
+        // Generar QR code si hay tarjetas y hash
+        if (data.cards && data.cards.length > 0 && data.cards[0].hash) {
+          generateQRCode(data.cards[0].hash);
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Error al cargar datos");
@@ -241,9 +245,9 @@ export default function CustomerWalletPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cardType: walletData?.cards[0]?.type || 'FIDELITY',
-          totalUses: walletData?.cards[0]?.loyalty?.totalUses || 10,
-          initialUses: walletData?.cards[0]?.prepaid?.remainingUses || 10
+          cardType: 'FIDELITY', // Por defecto fidelidad
+          totalUses: 10,
+          initialUses: 10
         })
       });
       
