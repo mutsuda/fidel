@@ -398,7 +398,7 @@ export default function CardDetailPage() {
                 </button>
               </div>
               <div className="flex justify-center">
-                <div className="w-48 h-48 bg-white p-4 rounded border">
+                <div className="w-48 h-48 bg-white p-4 rounded border flex items-center justify-center">
                   <QRCodeSVG 
                     value={cardData.hash}
                     size={192}

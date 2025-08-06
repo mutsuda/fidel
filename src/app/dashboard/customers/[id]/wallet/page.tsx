@@ -244,6 +244,7 @@ export default function CustomerWalletPage() {
   };
 
   const createNewCard = async () => {
+    console.log("createNewCard clicked");
     setShowCreateCardModal(true);
   };
 
