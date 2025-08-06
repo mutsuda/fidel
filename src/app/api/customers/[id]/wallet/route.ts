@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const segments = pathname.split("/");
     const customerId = segments.at(-2) || ""; // El ID está en la posición -2 para /api/customers/[id]/wallet
 
-    // Buscar el cliente y su tarjeta
+    // Buscar el cliente y todas sus tarjetas
     const customer = await prisma.customer.findFirst({
       where: { 
         id: customerId,
@@ -24,8 +24,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         cards: {
-          orderBy: { createdAt: 'desc' },
-          take: 1
+          orderBy: { createdAt: 'desc' }
         }
       }
     });
@@ -35,10 +34,45 @@ export async function GET(request: NextRequest) {
     }
 
     if (customer.cards.length === 0) {
-      return NextResponse.json({ error: "Cliente sin tarjeta" }, { status: 404 });
+      return NextResponse.json({ error: "Cliente sin tarjetas" }, { status: 404 });
     }
 
-    const card = customer.cards[0];
+    // Procesar todas las tarjetas
+    const processedCards = customer.cards.map(card => {
+      const cardData = {
+        id: card.id,
+        code: card.code,
+        hash: card.hash,
+        type: card.type,
+        active: card.active,
+        currentUses: card.currentUses,
+        totalUses: card.totalUses,
+        remainingUses: card.remainingUses,
+        initialUses: card.initialUses,
+        createdAt: card.createdAt,
+        
+        // Datos específicos según tipo
+        loyalty: card.type === 'FIDELITY' ? {
+          currentUses: card.currentUses,
+          totalUses: card.totalUses,
+          progress: `${card.currentUses}/${card.totalUses || 10}`,
+          isCompleted: card.currentUses >= (card.totalUses || 10),
+          message: card.currentUses >= (card.totalUses || 10) 
+            ? "¡Café gratis disponible!" 
+            : `${card.currentUses} de ${card.totalUses || 10} cafés`
+        } : null,
+        
+        prepaid: card.type === 'PREPAID' ? {
+          remainingUses: card.remainingUses,
+          initialUses: card.initialUses,
+          message: card.remainingUses 
+            ? `Quedan ${card.remainingUses} usos` 
+            : "No quedan usos disponibles"
+        } : null
+      };
+      
+      return cardData;
+    });
 
     // Formato optimizado para Wallet integration
     const walletData = {
@@ -50,45 +84,19 @@ export async function GET(request: NextRequest) {
         phone: customer.phone
       },
       
-      // Datos de la tarjeta
-      card: {
-        id: card.id,
-        code: card.code,
-        hash: card.hash,
-        type: card.type,
-        active: card.active,
-        createdAt: card.createdAt
-      },
+      // Todas las tarjetas del cliente
+      cards: processedCards,
       
-      // Datos específicos según tipo
-      loyalty: card.type === 'FIDELITY' ? {
-        currentUses: card.currentUses,
-        totalUses: card.totalUses,
-        progress: `${card.currentUses}/${card.totalUses || 11}`,
-        isCompleted: card.currentUses >= (card.totalUses || 11),
-        message: card.currentUses >= (card.totalUses || 11) 
-          ? "¡Café gratis disponible!" 
-          : `${card.currentUses} de ${card.totalUses || 11} cafés`
-      } : null,
-      
-      prepaid: card.type === 'PREPAID' ? {
-        remainingUses: card.remainingUses,
-        initialUses: card.initialUses,
-        message: card.remainingUses 
-          ? `Quedan ${card.remainingUses} usos` 
-          : "No quedan usos disponibles"
-      } : null,
-      
-      // Datos para QR
+      // Datos para QR (usar la tarjeta más reciente)
       qr: {
-        hash: card.hash,
+        hash: customer.cards[0].hash,
         dataUrl: null // Se generará en el cliente si es necesario
       },
       
       // Metadatos para Wallet
       metadata: {
         businessName: "Fidel", // Se puede personalizar
-        cardType: card.type === 'FIDELITY' ? 'loyalty' : 'prepaid',
+        cardType: customer.cards[0].type === 'FIDELITY' ? 'loyalty' : 'prepaid',
         lastUpdated: new Date().toISOString(),
         version: "1.0"
       }
