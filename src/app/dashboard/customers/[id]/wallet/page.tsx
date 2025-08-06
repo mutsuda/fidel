@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import QRCode from "qrcode";
+import { QRCodeSVG } from "qrcode.react";
 
 interface WalletData {
   customer: {
@@ -285,6 +286,61 @@ export default function CustomerWalletPage() {
     } catch (error) {
       console.error("Error deleting customer:", error);
       alert("Error al eliminar el cliente");
+    }
+  };
+
+  const editCard = (cardId: string) => {
+    // TODO: Implementar edición individual de tarjeta
+    alert("Edición individual de tarjeta - próximamente");
+  };
+
+  const deleteCard = async (cardId: string) => {
+    if (!confirm("¿Estás seguro de que quieres eliminar esta tarjeta?")) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/customers/${customerId}/cards/${cardId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        alert("Tarjeta eliminada correctamente");
+        fetchWalletData(); // Recargar datos
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting card:", error);
+      alert("Error al eliminar la tarjeta");
+    }
+  };
+
+  const downloadCardQR = async (card: any) => {
+    try {
+      const qrDataUrl = await QRCode.toDataURL(card.hash, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      
+      const response = await fetch(qrDataUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qr-${card.code}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading QR:", error);
+      alert("Error al descargar QR");
     }
   };
 
@@ -610,119 +666,119 @@ export default function CustomerWalletPage() {
           )}
         </div>
 
-        {/* Información de la tarjeta */}
+        {/* Lista de tarjetas */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Tarjeta Digital</h2>
-            {!editing && (
-              <button
-                onClick={startEditing}
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-              >
-                Editar
-              </button>
-            )}
+            <h2 className="text-xl font-semibold">Tarjetas ({walletData.cards.length})</h2>
+            <button
+              onClick={createNewCard}
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center space-x-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span>Nueva Tarjeta</span>
+            </button>
           </div>
           
-          {!editing ? (
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Código</label>
-                <p className="font-mono text-lg">{walletData.cards[0]?.code}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Tipo</label>
-                <p className="text-lg">{getCardTypeLabel(walletData.cards[0]?.type)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Estado</label>
-                <p className={`text-lg ${getStatusColor(walletData.cards[0]?.loyalty?.isCompleted, walletData.cards[0]?.active)}`}>
-                  {walletData.cards[0]?.active ? "Activa" : "Inactiva"}
-                </p>
-              </div>
-              
-              {walletData.cards[0]?.loyalty && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Progreso</label>
-                  <p className="text-lg">{walletData.cards[0].loyalty.progress}</p>
-                  <p className="text-sm text-gray-600">{walletData.cards[0].loyalty.message}</p>
-                </div>
-              )}
-              
-              {walletData.cards[0]?.prepaid && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Usos restantes</label>
-                  <p className="text-lg">{walletData.cards[0].prepaid.remainingUses}</p>
-                  <p className="text-sm text-gray-600">{walletData.cards[0].prepaid.message}</p>
-                </div>
-              )}
+          {walletData.cards.length === 0 ? (
+            <div className="text-center py-8">
+              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              <p className="text-lg font-medium text-gray-900 mb-2">Sin tarjetas</p>
+              <p className="text-gray-600">Este cliente aún no tiene tarjetas registradas</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Código</label>
-                <p className="font-mono text-lg">{walletData.cards[0]?.code}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Tipo</label>
-                <p className="text-lg">{getCardTypeLabel(walletData.cards[0]?.type)}</p>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-gray-700">Estado</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={editData.active}
-                    onChange={(e) => setEditData({...editData, active: e.target.checked})}
-                    className="rounded"
-                  />
-                  <span className="text-sm">{editData.active ? "Activa" : "Inactiva"}</span>
+              {walletData.cards.map((card, index) => (
+                <div key={card.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center space-x-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        card.type === 'FIDELITY' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {getCardTypeLabel(card.type)}
+                      </span>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        card.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {card.active ? 'Activa' : 'Inactiva'}
+                      </span>
+                      {index === 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Más reciente
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => editCard(card.id)}
+                        className="text-blue-600 hover:text-blue-800 text-sm"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => deleteCard(card.id)}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-700">Código</label>
+                      <p className="font-mono text-sm">{card.code}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-700">Creada</label>
+                      <p className="text-sm">{new Date(card.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  
+                  {card.loyalty && (
+                    <div className="mb-2">
+                      <label className="text-xs font-medium text-gray-700">Progreso Fidelidad</label>
+                      <p className="text-sm">{card.loyalty.progress}</p>
+                      <p className="text-xs text-gray-600">{card.loyalty.message}</p>
+                    </div>
+                  )}
+                  
+                  {card.prepaid && (
+                    <div className="mb-2">
+                      <label className="text-xs font-medium text-gray-700">Usos Prepago</label>
+                      <p className="text-sm">{card.prepaid.remainingUses} restantes</p>
+                      <p className="text-xs text-gray-600">{card.prepaid.message}</p>
+                    </div>
+                  )}
+                  
+                  {/* QR individual */}
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-gray-700">QR para esta tarjeta</span>
+                      <button
+                        onClick={() => downloadCardQR(card)}
+                        className="text-blue-600 hover:text-blue-800 text-xs"
+                      >
+                        Descargar
+                      </button>
+                    </div>
+                                         <div className="mt-2 flex justify-center">
+                       <div className="w-16 h-16 bg-white p-1 rounded border">
+                         <QRCodeSVG 
+                           value={card.hash}
+                           size={56}
+                           level="M"
+                         />
+                       </div>
+                     </div>
+                  </div>
                 </div>
-              </div>
-              
-              {walletData.cards[0]?.loyalty && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Usos actuales (Fidelidad)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max={walletData.cards[0].loyalty.totalUses || 10}
-                    value={editData.currentUses}
-                    onChange={(e) => setEditData({...editData, currentUses: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500">Máximo: {walletData.cards[0].loyalty.totalUses || 10}</p>
-                </div>
-              )}
-              
-              {walletData.cards[0]?.prepaid && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Usos restantes (Prepago)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editData.remainingUses}
-                    onChange={(e) => setEditData({...editData, remainingUses: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              )}
-              
-              <div className="flex space-x-2 pt-2">
-                <button
-                  onClick={saveChanges}
-                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
-                >
-                  Guardar
-                </button>
-                <button
-                  onClick={cancelEditing}
-                  className="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
-                >
-                  Cancelar
-                </button>
-              </div>
+              ))}
             </div>
           )}
         </div>
