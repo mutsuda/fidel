@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import QRCode from "qrcode";
 
 interface Customer {
   id: string;
@@ -14,6 +15,7 @@ interface Customer {
 interface Card {
   id: string;
   code: string;
+  hash: string;
   type: 'FIDELITY' | 'PREPAID';
   currentUses: number;
   totalUses?: number;
@@ -26,6 +28,7 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -44,6 +47,8 @@ export default function CustomersPage() {
       if (response.ok) {
         const data = await response.json();
         setCustomers(data);
+        // Generar QR codes para cada cliente
+        generateQRCodes(data);
       } else {
         console.error("Error fetching customers");
       }
@@ -52,6 +57,23 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateQRCodes = async (customersData: Customer[]) => {
+    const newQrCodes: { [key: string]: string } = {};
+    
+    for (const customer of customersData) {
+      if (customer.cards.length > 0) {
+        try {
+          const qrDataUrl = await QRCode.toDataURL(customer.cards[0].hash);
+          newQrCodes[customer.id] = qrDataUrl;
+        } catch (error) {
+          console.error("Error generating QR for customer:", customer.id, error);
+        }
+      }
+    }
+    
+    setQrCodes(newQrCodes);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -257,23 +279,38 @@ export default function CustomersPage() {
                     </p>
                   </div>
                   
-                  <div className="text-right">
-                    {customer.cards.length > 0 ? (
-                      <div>
-                        <div className="text-sm text-gray-600">
-                          {getCardTypeLabel(customer.cards[0].type)}
+                  <div className="flex items-center gap-4">
+                    {/* Información de la tarjeta */}
+                    <div className="text-right">
+                      {customer.cards.length > 0 ? (
+                        <div>
+                          <div className="text-sm text-gray-600">
+                            {getCardTypeLabel(customer.cards[0].type)}
+                          </div>
+                          <div className={`text-sm font-medium ${
+                            customer.cards[0].active ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {getCardStatus(customer.cards[0])}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {customer.cards[0].code}
+                          </div>
                         </div>
-                        <div className={`text-sm font-medium ${
-                          customer.cards[0].active ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {getCardStatus(customer.cards[0])}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {customer.cards[0].code}
-                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-500">Sin tarjeta</div>
+                      )}
+                    </div>
+                    
+                    {/* QR Code */}
+                    {customer.cards.length > 0 && qrCodes[customer.id] && (
+                      <div className="flex flex-col items-center">
+                        <img 
+                          src={qrCodes[customer.id]} 
+                          alt="QR Code" 
+                          className="w-16 h-16 border border-gray-200 rounded"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">QR para escanear</p>
                       </div>
-                    ) : (
-                      <div className="text-sm text-gray-500">Sin tarjeta</div>
                     )}
                   </div>
                 </div>
