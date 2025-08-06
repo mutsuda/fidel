@@ -19,6 +19,7 @@ export default function Navbar() {
         <div className="flex gap-4 items-center">
           <Link href="/dashboard/batches" className="text-gray-700 hover:text-blue-700 font-medium transition">Lotes</Link>
           <Link href="/dashboard/templates" className="text-gray-700 hover:text-blue-700 font-medium transition">Plantillas</Link>
+          <Link href="/dashboard/customers" className="text-gray-700 hover:text-blue-700 font-medium transition">Clientes</Link>
           <Link href="/dashboard/validate" className="text-gray-700 hover:text-blue-700 font-medium transition">Validar QR</Link>
           
           {/* Profile Menu */}

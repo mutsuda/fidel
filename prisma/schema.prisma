@@ -22,6 +22,8 @@ model User {
   createdAt DateTime @default(now())
   batches   Batch[]
   templates Template[]
+  customers Customer[]
+  cards     Card[]
 }
 
 model Template {
@@ -68,4 +70,55 @@ model Scan {
   ipAddress String?
   userAgent String?
   scannedAt DateTime @default(now())
+}
+
+// Nuevos modelos para el sistema de clientes y tarjetas individuales
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  cards     Card[]
+  createdAt DateTime @default(now())
+}
+
+model Card {
+  id            String   @id @default(cuid())
+  code          String   @unique // Código legible
+  hash          String   @unique // Hash único para QR
+  customer      Customer @relation(fields: [customerId], references: [id])
+  customerId    String
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  
+  // Tipo de tarjeta
+  type          CardType @default(FIDELITY)
+  
+  // Para tarjetas de fidelidad
+  totalUses     Int?     // Total de usos (ej: 11 para café gratuito)
+  currentUses   Int      @default(0) // Usos actuales
+  
+  // Para tarjetas prepago
+  initialUses   Int?     // Usos iniciales (ej: 10)
+  remainingUses Int?     // Usos restantes
+  
+  active        Boolean  @default(true)
+  scans         CardScan[]
+  createdAt     DateTime @default(now())
+}
+
+model CardScan {
+  id        String   @id @default(cuid())
+  card      Card     @relation(fields: [cardId], references: [id])
+  cardId    String
+  ipAddress String?
+  userAgent String?
+  scannedAt DateTime @default(now())
+}
+
+enum CardType {
+  FIDELITY  // Sistema de fidelidad (ej: 11 cafés = 1 gratis)
+  PREPAID   // Sistema prepago (ej: 10 usos regalados)
 }

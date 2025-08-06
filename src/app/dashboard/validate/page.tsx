@@ -63,14 +63,36 @@ export default function ValidatePage() {
   const handleValidate = async (hash?: string) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/validate", {
+      // Primero intentar con el sistema nuevo (tarjetas de clientes)
+      let res = await fetch("/api/validate/card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ hash: (hash ?? input).trim() })
       });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok) {
+          setCurrentResult({
+            id: Date.now(),
+            type: 'success',
+            card: data.card,
+            timestamp: new Date()
+          });
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Si no funciona, intentar con el sistema antiguo (lotes)
+      res = await fetch("/api/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hash: (hash ?? input).trim() })
+      });
+      
       const data = await res.json();
       if (!data.ok) {
-        // Mostrar solo el resultado más reciente
         setCurrentResult({
           id: Date.now(),
           type: 'error',
@@ -78,7 +100,6 @@ export default function ValidatePage() {
           timestamp: new Date()
         });
       } else {
-        // Mostrar solo el resultado más reciente
         setCurrentResult({
           id: Date.now(),
           type: 'success',
@@ -205,26 +226,57 @@ export default function ValidatePage() {
                   {currentResult.type === 'success' && currentResult.card && (
                     <div className="space-y-2">
                       <div className="font-mono text-lg">{currentResult.card.code}</div>
-                      <div className="text-sm text-gray-700">Lote: <b>{currentResult.card.batch.name}</b></div>
-                      <div className="text-sm text-gray-700">Estado: <b>{currentResult.card.active ? "Activa" : "Inactiva"}</b></div>
-                      <div className="text-sm text-gray-700">Usos: <b>{currentResult.card.uses === null ? "∞" : currentResult.card.uses}</b></div>
                       
-                      {currentResult.card.uses !== null && (
-                        <div className="flex gap-2 mt-3">
-                          <button
-                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                            onClick={() => handleAction(currentResult.card.id, "sub")}
-                            disabled={loading || currentResult.card.uses === 0}
-                          >
-                            -1
-                          </button>
-                          <button
-                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-300"
-                            onClick={() => handleAction(currentResult.card.id, "add")}
-                            disabled={loading}
-                          >
-                            +1
-                          </button>
+                      {/* Mostrar información según el tipo de tarjeta */}
+                      {currentResult.card.customer ? (
+                        // Tarjeta de cliente (nuevo sistema)
+                        <div>
+                          <div className="text-sm text-gray-700">Cliente: <b>{currentResult.card.customer.name}</b></div>
+                          <div className="text-sm text-gray-700">Email: <b>{currentResult.card.customer.email}</b></div>
+                          <div className="text-sm text-gray-700">Tipo: <b>{currentResult.card.type === 'FIDELITY' ? 'Fidelidad' : 'Prepago'}</b></div>
+                          <div className="text-sm text-gray-700">Estado: <b>{currentResult.card.active ? "Activa" : "Inactiva"}</b></div>
+                          
+                          {currentResult.card.type === 'FIDELITY' ? (
+                            <div className="text-sm text-gray-700">
+                              Progreso: <b>{currentResult.card.currentUses}/{currentResult.card.totalUses}</b>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-700">
+                              Restantes: <b>{currentResult.card.remainingUses}</b>
+                            </div>
+                          )}
+                          
+                          {currentResult.card.message && (
+                            <div className="text-sm font-medium text-green-600 mt-2">
+                              {currentResult.card.message}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // Tarjeta de lote (sistema antiguo)
+                        <div>
+                          <div className="text-sm text-gray-700">Lote: <b>{currentResult.card.batch.name}</b></div>
+                          <div className="text-sm text-gray-700">Estado: <b>{currentResult.card.active ? "Activa" : "Inactiva"}</b></div>
+                          <div className="text-sm text-gray-700">Usos: <b>{currentResult.card.uses === null ? "∞" : currentResult.card.uses}</b></div>
+                          
+                          {currentResult.card.uses !== null && (
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                                onClick={() => handleAction(currentResult.card.id, "sub")}
+                                disabled={loading || currentResult.card.uses === 0}
+                              >
+                                -1
+                              </button>
+                              <button
+                                className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-300"
+                                onClick={() => handleAction(currentResult.card.id, "add")}
+                                disabled={loading}
+                              >
+                                +1
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
