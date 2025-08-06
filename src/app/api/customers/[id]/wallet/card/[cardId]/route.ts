@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
   try {
     const { pathname } = new URL(request.url);
     const segments = pathname.split("/");
-    const customerId = segments.at(-3) || ""; // /api/customers/[id]/wallet/card/[cardId]
+    // La ruta es: /api/customers/[id]/wallet/card/[cardId]
+    // segments: ["", "api", "customers", "[id]", "wallet", "card", "[cardId]"]
+    const customerId = segments.at(-4) || ""; // customers/[id]/wallet/card/[cardId]
     const cardId = segments.at(-1) || "";
 
     const card = await (prisma as any).card.findFirst({
@@ -81,7 +83,8 @@ export async function PATCH(request: NextRequest) {
   try {
     const { pathname } = new URL(request.url);
     const segments = pathname.split("/");
-    const customerId = segments.at(-3) || "";
+    // La ruta es: /api/customers/[id]/wallet/card/[cardId]
+    const customerId = segments.at(-4) || "";
     const cardId = segments.at(-1) || "";
 
     const body = await request.json();
