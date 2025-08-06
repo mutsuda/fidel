@@ -72,6 +72,12 @@ export default function CustomerWalletPage() {
     initialUses: 10
   });
   const [editingCustomer, setEditingCustomer] = useState(false);
+  const [showCreateCardModal, setShowCreateCardModal] = useState(false);
+  const [newCardData, setNewCardData] = useState({
+    cardType: 'FIDELITY' as 'FIDELITY' | 'PREPAID',
+    totalUses: 10,
+    initialUses: 10
+  });
 
   useEffect(() => {
     if (!customerId) return;
@@ -238,23 +244,25 @@ export default function CustomerWalletPage() {
   };
 
   const createNewCard = async () => {
-    if (!confirm("¿Quieres crear una nueva tarjeta para este cliente?")) {
-      return;
-    }
-    
+    setShowCreateCardModal(true);
+  };
+
+  const handleCreateCard = async () => {
     try {
       const response = await fetch(`/api/customers/${customerId}/cards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cardType: 'FIDELITY', // Por defecto fidelidad
-          totalUses: 10,
-          initialUses: 10
-        })
+        body: JSON.stringify(newCardData)
       });
       
       if (response.ok) {
         alert("Nueva tarjeta creada correctamente");
+        setShowCreateCardModal(false);
+        setNewCardData({
+          cardType: 'FIDELITY',
+          totalUses: 10,
+          initialUses: 10
+        });
         fetchWalletData(); // Recargar datos
       } else {
         const errorData = await response.json();
@@ -264,6 +272,15 @@ export default function CustomerWalletPage() {
       console.error("Error creating new card:", error);
       alert("Error al crear nueva tarjeta");
     }
+  };
+
+  const cancelCreateCard = () => {
+    setShowCreateCardModal(false);
+    setNewCardData({
+      cardType: 'FIDELITY',
+      totalUses: 10,
+      initialUses: 10
+    });
   };
 
   const deleteCustomer = async () => {
@@ -495,10 +512,84 @@ export default function CustomerWalletPage() {
               </button>
             </div>
           </div>
+              </div>
+
+      {/* Modal para crear nueva tarjeta */}
+      {showCreateCardModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">Crear Nueva Tarjeta</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tipo de tarjeta</label>
+                <select
+                  value={newCardData.cardType}
+                  onChange={(e) => {
+                    const newType = e.target.value as 'FIDELITY' | 'PREPAID';
+                    setNewCardData({
+                      ...newCardData,
+                      cardType: newType,
+                      // Resetear valores según el nuevo tipo
+                      totalUses: newType === 'FIDELITY' ? 10 : newCardData.totalUses,
+                      initialUses: newType === 'PREPAID' ? 10 : newCardData.initialUses
+                    });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
+                  <option value="PREPAID">Prepago (usos limitados)</option>
+                </select>
+              </div>
+              
+              {newCardData.cardType === 'FIDELITY' && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Cafés para completar (el siguiente será gratis)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newCardData.totalUses}
+                    onChange={(e) => setNewCardData({...newCardData, totalUses: parseInt(e.target.value) || 10})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Ej: 10 cafés = el 11º gratis</p>
+                </div>
+              )}
+              
+              {newCardData.cardType === 'PREPAID' && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Usos iniciales</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newCardData.initialUses}
+                    onChange={(e) => setNewCardData({...newCardData, initialUses: parseInt(e.target.value) || 10})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={handleCreateCard}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+              >
+                Crear Tarjeta
+              </button>
+              <button
+                onClick={cancelCreateCard}
+                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
+}
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -513,15 +604,6 @@ export default function CustomerWalletPage() {
               </p>
             </div>
             <div className="flex space-x-3">
-              <button
-                onClick={createNewCard}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                <span>Nueva Tarjeta</span>
-              </button>
               <button
                 onClick={deleteCustomer}
                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center space-x-2"
