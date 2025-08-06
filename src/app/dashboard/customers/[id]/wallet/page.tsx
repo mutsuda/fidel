@@ -122,7 +122,7 @@ export default function CustomerWalletPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `qr-${walletData?.card.code}.png`;
+      a.download = `qr-${walletData?.cards[0]?.code}.png`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -151,11 +151,11 @@ export default function CustomerWalletPage() {
   };
 
   const startEditing = () => {
-    if (walletData) {
+    if (walletData && walletData.cards.length > 0) {
       setEditData({
-        currentUses: walletData.loyalty?.currentUses || 0,
-        remainingUses: walletData.prepaid?.remainingUses || 0,
-        active: walletData.card.active
+        currentUses: walletData.cards[0].loyalty?.currentUses || 0,
+        remainingUses: walletData.cards[0].prepaid?.remainingUses || 0,
+        active: walletData.cards[0].active
       });
       setEditing(true);
     }
@@ -195,9 +195,9 @@ export default function CustomerWalletPage() {
         name: walletData.customer.name,
         email: walletData.customer.email,
         phone: walletData.customer.phone || "",
-        cardType: walletData.card.type,
-        totalUses: walletData.loyalty?.totalUses || 10,
-        initialUses: walletData.prepaid?.remainingUses || 10
+        cardType: walletData.cards[0]?.type || 'FIDELITY',
+        totalUses: walletData.cards[0]?.loyalty?.totalUses || 10,
+        initialUses: walletData.cards[0]?.prepaid?.remainingUses || 10
       });
       setEditingCustomer(true);
     }
@@ -241,9 +241,9 @@ export default function CustomerWalletPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cardType: walletData?.card.type || 'FIDELITY',
-          totalUses: walletData?.loyalty?.totalUses || 10,
-          initialUses: walletData?.prepaid?.remainingUses || 10
+          cardType: walletData?.cards[0]?.type || 'FIDELITY',
+          totalUses: walletData?.cards[0]?.loyalty?.totalUses || 10,
+          initialUses: walletData?.cards[0]?.prepaid?.remainingUses || 10
         })
       });
       
@@ -483,32 +483,32 @@ export default function CustomerWalletPage() {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Código</label>
-                <p className="font-mono text-lg">{walletData.card.code}</p>
+                <p className="font-mono text-lg">{walletData.cards[0]?.code}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Tipo</label>
-                <p className="text-lg">{getCardTypeLabel(walletData.card.type)}</p>
+                <p className="text-lg">{getCardTypeLabel(walletData.cards[0]?.type)}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Estado</label>
-                <p className={`text-lg ${getStatusColor(walletData.loyalty?.isCompleted, walletData.card.active)}`}>
-                  {walletData.card.active ? "Activa" : "Inactiva"}
+                <p className={`text-lg ${getStatusColor(walletData.cards[0]?.loyalty?.isCompleted, walletData.cards[0]?.active)}`}>
+                  {walletData.cards[0]?.active ? "Activa" : "Inactiva"}
                 </p>
               </div>
               
-              {walletData.loyalty && (
+              {walletData.cards[0]?.loyalty && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Progreso</label>
-                  <p className="text-lg">{walletData.loyalty.progress}</p>
-                  <p className="text-sm text-gray-600">{walletData.loyalty.message}</p>
+                  <p className="text-lg">{walletData.cards[0].loyalty.progress}</p>
+                  <p className="text-sm text-gray-600">{walletData.cards[0].loyalty.message}</p>
                 </div>
               )}
               
-              {walletData.prepaid && (
+              {walletData.cards[0]?.prepaid && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Usos restantes</label>
-                  <p className="text-lg">{walletData.prepaid.remainingUses}</p>
-                  <p className="text-sm text-gray-600">{walletData.prepaid.message}</p>
+                  <p className="text-lg">{walletData.cards[0].prepaid.remainingUses}</p>
+                  <p className="text-sm text-gray-600">{walletData.cards[0].prepaid.message}</p>
                 </div>
               )}
             </div>
@@ -516,11 +516,11 @@ export default function CustomerWalletPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">Código</label>
-                <p className="font-mono text-lg">{walletData.card.code}</p>
+                <p className="font-mono text-lg">{walletData.cards[0]?.code}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Tipo</label>
-                <p className="text-lg">{getCardTypeLabel(walletData.card.type)}</p>
+                <p className="text-lg">{getCardTypeLabel(walletData.cards[0]?.type)}</p>
               </div>
               
               <div>
@@ -536,22 +536,22 @@ export default function CustomerWalletPage() {
                 </div>
               </div>
               
-              {walletData.loyalty && (
+              {walletData.cards[0]?.loyalty && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Usos actuales (Fidelidad)</label>
                   <input
                     type="number"
                     min="0"
-                    max={walletData.loyalty.totalUses || 11}
+                    max={walletData.cards[0].loyalty.totalUses || 10}
                     value={editData.currentUses}
                     onChange={(e) => setEditData({...editData, currentUses: parseInt(e.target.value) || 0})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p className="text-xs text-gray-500">Máximo: {walletData.loyalty.totalUses || 11}</p>
+                  <p className="text-xs text-gray-500">Máximo: {walletData.cards[0].loyalty.totalUses || 10}</p>
                 </div>
               )}
               
-              {walletData.prepaid && (
+              {walletData.cards[0]?.prepaid && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Usos restantes (Prepago)</label>
                   <input
@@ -652,7 +652,7 @@ export default function CustomerWalletPage() {
           <div>
             <label className="font-medium text-gray-700">Hash de la tarjeta</label>
             <p className="font-mono text-xs text-gray-600 break-all">
-              {walletData.card.hash}
+              {walletData.cards[0]?.hash}
             </p>
           </div>
           <div>
