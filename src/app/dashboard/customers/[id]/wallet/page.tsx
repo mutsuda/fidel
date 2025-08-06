@@ -57,6 +57,15 @@ export default function CustomerWalletPage() {
     remainingUses: 0,
     active: true
   });
+  const [editCustomer, setEditCustomer] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    cardType: "FIDELITY" as 'FIDELITY' | 'PREPAID',
+    totalUses: 11,
+    initialUses: 10
+  });
+  const [editingCustomer, setEditingCustomer] = useState(false);
 
   useEffect(() => {
     if (!customerId) return;
@@ -176,6 +185,48 @@ export default function CustomerWalletPage() {
     setEditing(false);
   };
 
+  const startEditingCustomer = () => {
+    if (walletData) {
+      setEditCustomer({
+        name: walletData.customer.name,
+        email: walletData.customer.email,
+        phone: walletData.customer.phone || "",
+        cardType: walletData.card.type,
+        totalUses: walletData.loyalty?.totalUses || 11,
+        initialUses: walletData.prepaid?.remainingUses || 10
+      });
+      setEditingCustomer(true);
+    }
+  };
+
+  const saveCustomerChanges = async () => {
+    if (!walletData) return;
+    
+    try {
+      const response = await fetch(`/api/customers/${customerId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editCustomer)
+      });
+      
+      if (response.ok) {
+        setEditingCustomer(false);
+        fetchWalletData(); // Recargar datos
+        alert("Información del cliente actualizada correctamente");
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error saving customer changes:", error);
+      alert("Error al actualizar información del cliente");
+    }
+  };
+
+  const cancelEditingCustomer = () => {
+    setEditingCustomer(false);
+  };
+
   const getCardTypeLabel = (type: string) => {
     return type === 'FIDELITY' ? 'Fidelidad' : 'Prepago';
   };
@@ -204,23 +255,123 @@ export default function CustomerWalletPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Información del cliente */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Información del Cliente</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Nombre</label>
-              <p className="text-lg">{walletData.customer.name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Email</label>
-              <p className="text-lg">{walletData.customer.email}</p>
-            </div>
-            {walletData.customer.phone && (
-              <div>
-                <label className="text-sm font-medium text-gray-700">Teléfono</label>
-                <p className="text-lg">{walletData.customer.phone}</p>
-              </div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Información del Cliente</h2>
+            {!editingCustomer && (
+              <button
+                onClick={startEditingCustomer}
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+              >
+                Editar Cliente
+              </button>
             )}
           </div>
+          
+          {!editingCustomer ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nombre</label>
+                <p className="text-lg">{walletData.customer.name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Email</label>
+                <p className="text-lg">{walletData.customer.email}</p>
+              </div>
+              {walletData.customer.phone && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Teléfono</label>
+                  <p className="text-lg">{walletData.customer.phone}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nombre *</label>
+                <input
+                  type="text"
+                  value={editCustomer.name}
+                  onChange={(e) => setEditCustomer({...editCustomer, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-700">Email *</label>
+                <input
+                  type="email"
+                  value={editCustomer.email}
+                  onChange={(e) => setEditCustomer({...editCustomer, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-700">Teléfono</label>
+                <input
+                  type="tel"
+                  value={editCustomer.phone}
+                  onChange={(e) => setEditCustomer({...editCustomer, phone: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tipo de tarjeta</label>
+                <select
+                  value={editCustomer.cardType}
+                  onChange={(e) => setEditCustomer({...editCustomer, cardType: e.target.value as 'FIDELITY' | 'PREPAID'})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="FIDELITY">Fidelidad (11 cafés = 1 gratis)</option>
+                  <option value="PREPAID">Prepago (usos limitados)</option>
+                </select>
+              </div>
+              
+              {editCustomer.cardType === 'FIDELITY' && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Total de usos para completar</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editCustomer.totalUses}
+                    onChange={(e) => setEditCustomer({...editCustomer, totalUses: parseInt(e.target.value) || 11})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+              
+              {editCustomer.cardType === 'PREPAID' && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Usos iniciales</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editCustomer.initialUses}
+                    onChange={(e) => setEditCustomer({...editCustomer, initialUses: parseInt(e.target.value) || 10})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+              
+              <div className="flex space-x-2 pt-2">
+                <button
+                  onClick={saveCustomerChanges}
+                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+                >
+                  Guardar Cliente
+                </button>
+                <button
+                  onClick={cancelEditingCustomer}
+                  className="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Información de la tarjeta */}
