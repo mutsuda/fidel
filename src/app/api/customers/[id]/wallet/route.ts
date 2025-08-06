@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       // Buscar la última validación de esta tarjeta
       const lastScan = await (prisma as any).cardScan.findFirst({
         where: { cardId: card.id },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { scannedAt: 'desc' }
       });
 
       const cardData = {
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         remainingUses: card.remainingUses,
         initialUses: card.initialUses,
         createdAt: card.createdAt,
-        lastValidation: lastScan ? lastScan.createdAt : null,
+        lastValidation: lastScan ? lastScan.scannedAt : null,
         
         // Datos específicos según tipo
         loyalty: card.type === 'FIDELITY' ? {
