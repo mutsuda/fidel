@@ -58,8 +58,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(walletData);
     }
 
-    // Procesar todas las tarjetas
-    const processedCards = customer.cards.map((card: any) => {
+    // Procesar todas las tarjetas con información de última validación
+    const processedCards = await Promise.all(customer.cards.map(async (card: any) => {
+      // Buscar la última validación de esta tarjeta
+      const lastScan = await (prisma as any).cardScan.findFirst({
+        where: { cardId: card.id },
+        orderBy: { createdAt: 'desc' }
+      });
+
       const cardData = {
         id: card.id,
         code: card.code,
@@ -71,6 +77,7 @@ export async function GET(request: NextRequest) {
         remainingUses: card.remainingUses,
         initialUses: card.initialUses,
         createdAt: card.createdAt,
+        lastValidation: lastScan ? lastScan.createdAt : null,
         
         // Datos específicos según tipo
         loyalty: card.type === 'FIDELITY' ? {
@@ -93,7 +100,7 @@ export async function GET(request: NextRequest) {
       };
       
       return cardData;
-    });
+    }));
 
     // Formato optimizado para Wallet integration
     const walletData = {

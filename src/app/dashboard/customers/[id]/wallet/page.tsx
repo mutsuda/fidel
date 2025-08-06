@@ -22,6 +22,7 @@ interface WalletData {
     remainingUses?: number;
     initialUses?: number;
     createdAt: string;
+    lastValidation?: string | null;
     loyalty?: {
       currentUses: number;
       totalUses: number;
@@ -703,11 +704,11 @@ export default function CustomerWalletPage() {
                         }`}>
                           {getCardTypeLabel(card.type)}
                         </span>
-                        {index === 0 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Más reciente
-                          </span>
-                        )}
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          card.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {card.active ? 'Activa' : 'Inactiva'}
+                        </span>
                       </div>
                       
                       <div className="flex items-center space-x-6">
@@ -776,6 +777,38 @@ export default function CustomerWalletPage() {
                               <p className="text-sm font-medium">{card.prepaid.remainingUses} restantes</p>
                             </div>
                           )}
+                          
+                          <div>
+                            <label className="text-xs font-medium text-gray-700">Última validación</label>
+                            <p className="text-sm font-medium">
+                              {card.lastValidation 
+                                ? new Date(card.lastValidation).toLocaleString('es-ES', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })
+                                : 'Nunca'
+                              }
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <label className="text-xs font-medium text-gray-700">Última validación</label>
+                            <p className="text-sm font-medium">
+                              {card.lastValidation 
+                                ? new Date(card.lastValidation).toLocaleString('es-ES', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })
+                                : 'Nunca'
+                              }
+                            </p>
+                          </div>
                         </div>
                       </div>
                       
