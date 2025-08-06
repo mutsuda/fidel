@@ -666,10 +666,10 @@ export default function CustomerWalletPage() {
           )}
         </div>
 
-        {/* Lista de tarjetas */}
+                {/* Tarjetas activas - Vista resumida */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Tarjetas ({walletData.cards.length})</h2>
+            <h2 className="text-xl font-semibold">Tarjetas Activas ({walletData.cards.filter(card => card.active).length})</h2>
             <button
               onClick={createNewCard}
               className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center space-x-1"
@@ -690,9 +690,9 @@ export default function CustomerWalletPage() {
               <p className="text-gray-600">Este cliente aún no tiene tarjetas registradas</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {walletData.cards.map((card, index) => (
-                <div key={card.id} className="border border-gray-200 rounded-lg p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {walletData.cards.filter(card => card.active).map((card, index) => (
+                <div key={card.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center space-x-2">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -702,83 +702,77 @@ export default function CustomerWalletPage() {
                       }`}>
                         {getCardTypeLabel(card.type)}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        card.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {card.active ? 'Activa' : 'Inactiva'}
-                      </span>
                       {index === 0 && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                           Más reciente
                         </span>
                       )}
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => editCard(card.id)}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => deleteCard(card.id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-3">
-                    <div>
-                      <label className="text-xs font-medium text-gray-700">Código</label>
-                      <p className="font-mono text-sm">{card.code}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-700">Creada</label>
-                      <p className="text-sm">{new Date(card.createdAt).toLocaleDateString()}</p>
-                    </div>
+                  <div className="mb-3">
+                    <label className="text-xs font-medium text-gray-700">Código</label>
+                    <p className="font-mono text-sm">{card.code}</p>
                   </div>
                   
                   {card.loyalty && (
                     <div className="mb-2">
-                      <label className="text-xs font-medium text-gray-700">Progreso Fidelidad</label>
-                      <p className="text-sm">{card.loyalty.progress}</p>
+                      <label className="text-xs font-medium text-gray-700">Progreso</label>
+                      <p className="text-sm font-medium">{card.loyalty.progress}</p>
                       <p className="text-xs text-gray-600">{card.loyalty.message}</p>
                     </div>
                   )}
                   
                   {card.prepaid && (
                     <div className="mb-2">
-                      <label className="text-xs font-medium text-gray-700">Usos Prepago</label>
-                      <p className="text-sm">{card.prepaid.remainingUses} restantes</p>
+                      <label className="text-xs font-medium text-gray-700">Usos</label>
+                      <p className="text-sm font-medium">{card.prepaid.remainingUses} restantes</p>
                       <p className="text-xs text-gray-600">{card.prepaid.message}</p>
                     </div>
                   )}
                   
-                  {/* QR individual */}
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-gray-700">QR para esta tarjeta</span>
-                      <button
-                        onClick={() => downloadCardQR(card)}
-                        className="text-blue-600 hover:text-blue-800 text-xs"
-                      >
-                        Descargar
-                      </button>
-                    </div>
-                                         <div className="mt-2 flex justify-center">
-                       <div className="w-16 h-16 bg-white p-1 rounded border">
-                         <QRCodeSVG 
-                           value={card.hash}
-                           size={56}
-                           level="M"
-                         />
-                       </div>
-                     </div>
+                  <div className="flex space-x-2 pt-3 border-t border-gray-200">
+                    <button
+                      onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
+                      className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition"
+                    >
+                      Ver Detalles
+                    </button>
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          
+          {/* Tarjetas inactivas (si las hay) */}
+          {walletData.cards.filter(card => !card.active).length > 0 && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-medium text-gray-700 mb-3">Tarjetas Inactivas ({walletData.cards.filter(card => !card.active).length})</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {walletData.cards.filter(card => !card.active).map((card) => (
+                  <div key={card.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800`}>
+                        {getCardTypeLabel(card.type)} - Inactiva
+                      </span>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <label className="text-xs font-medium text-gray-700">Código</label>
+                      <p className="font-mono text-sm">{card.code}</p>
+                    </div>
+                    
+                    <div className="flex space-x-2 pt-3 border-t border-gray-200">
+                      <button
+                        onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
+                        className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700 transition"
+                      >
+                        Ver Detalles
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
