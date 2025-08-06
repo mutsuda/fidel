@@ -38,8 +38,8 @@ interface CardData {
 
 export default function CardDetailPage() {
   const params = useParams();
-  const customerId = params.id as string;
-  const cardId = params.cardId as string;
+  const customerId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const cardId = Array.isArray(params?.cardId) ? params.cardId[0] : params?.cardId;
   
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,8 +52,13 @@ export default function CardDetailPage() {
   });
 
   useEffect(() => {
+    if (!customerId || !cardId) {
+      setError("IDs de cliente o tarjeta no válidos");
+      setLoading(false);
+      return;
+    }
     fetchCardData();
-  }, [cardId]);
+  }, [customerId, cardId]);
 
   const fetchCardData = async () => {
     try {
