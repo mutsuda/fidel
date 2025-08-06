@@ -102,4 +102,63 @@ export async function PATCH(request: NextRequest) {
     console.error("Error updating customer:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  try {
+    const { pathname } = new URL(request.url);
+    const segments = pathname.split("/");
+    const customerId = segments.at(-1) || "";
+
+    // Buscar el cliente
+    const customer = await prisma.customer.findFirst({
+      where: { 
+        id: customerId,
+        userId: session.user.id 
+      },
+      include: {
+        cards: {
+          include: {
+            scans: true
+          }
+        }
+      }
+    });
+
+    if (!customer) {
+      return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+    }
+
+    // Eliminar en cascada: scans -> cards -> customer
+    for (const card of customer.cards) {
+      // Eliminar todos los scans de la tarjeta
+      await prisma.cardScan.deleteMany({
+        where: { cardId: card.id }
+      });
+    }
+
+    // Eliminar todas las tarjetas del cliente
+    await prisma.card.deleteMany({
+      where: { customerId: customerId }
+    });
+
+    // Eliminar el cliente
+    await prisma.customer.delete({
+      where: { id: customerId }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Cliente y tarjetas eliminados correctamente"
+    });
+
+  } catch (error) {
+    console.error("Error deleting customer:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
 } 
