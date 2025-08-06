@@ -66,10 +66,7 @@ export default function CustomerWalletPage() {
   const [editCustomer, setEditCustomer] = useState({
     name: "",
     email: "",
-    phone: "",
-    cardType: "FIDELITY" as 'FIDELITY' | 'PREPAID',
-    totalUses: 10,
-    initialUses: 10
+    phone: ""
   });
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [showCreateCardModal, setShowCreateCardModal] = useState(false);
@@ -206,10 +203,7 @@ export default function CustomerWalletPage() {
       setEditCustomer({
         name: walletData.customer.name,
         email: walletData.customer.email,
-        phone: walletData.customer.phone || "",
-        cardType: walletData.cards[0]?.type || 'FIDELITY',
-        totalUses: walletData.cards[0]?.loyalty?.totalUses || 10,
-        initialUses: walletData.cards[0]?.prepaid?.remainingUses || 10
+        phone: walletData.customer.phone || ""
       });
       setEditingCustomer(true);
     }
@@ -684,53 +678,7 @@ export default function CustomerWalletPage() {
                 />
               </div>
               
-              <div>
-                <label className="text-sm font-medium text-gray-700">Tipo de tarjeta</label>
-                <select
-                  value={editCustomer.cardType}
-                  onChange={(e) => {
-                    const newType = e.target.value as 'FIDELITY' | 'PREPAID';
-                    setEditCustomer({
-                      ...editCustomer, 
-                      cardType: newType,
-                      // Resetear valores según el nuevo tipo
-                      totalUses: newType === 'FIDELITY' ? 10 : editCustomer.totalUses,
-                      initialUses: newType === 'PREPAID' ? 10 : editCustomer.initialUses
-                    });
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
-                  <option value="PREPAID">Prepago (usos limitados)</option>
-                </select>
-              </div>
-              
-              {editCustomer.cardType === 'FIDELITY' && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Cafés para completar (el siguiente será gratis)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={editCustomer.totalUses}
-                    onChange={(e) => setEditCustomer({...editCustomer, totalUses: parseInt(e.target.value) || 10})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Ej: 10 cafés = el 11º gratis</p>
-                </div>
-              )}
-              
-              {editCustomer.cardType === 'PREPAID' && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Usos iniciales</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={editCustomer.initialUses}
-                    onChange={(e) => setEditCustomer({...editCustomer, initialUses: parseInt(e.target.value) || 10})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              )}
+
               
               <div className="flex space-x-2 pt-2">
                 <button
