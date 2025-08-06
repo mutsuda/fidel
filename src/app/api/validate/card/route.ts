@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Registrar el escaneo
+    // Solo registrar el escaneo, sin actualizar contadores
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
     
@@ -70,18 +70,10 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Actualizar contadores según el tipo
+    // Devolver información sin modificar contadores
     if (card.type === 'FIDELITY') {
-      const newCurrentUses = card.currentUses + 1;
-      const isCompleted = newCurrentUses >= (card.totalUses || 11);
+      const isCompleted = card.currentUses >= (card.totalUses || 11);
       
-      await prisma.card.update({
-        where: { id: card.id },
-        data: {
-          currentUses: isCompleted ? 0 : newCurrentUses // Reset si completa
-        }
-      });
-
       return NextResponse.json({
         ok: true,
         card: {
@@ -89,23 +81,16 @@ export async function POST(request: NextRequest) {
           code: card.code,
           type: card.type,
           customer: card.customer,
-          currentUses: isCompleted ? 0 : newCurrentUses,
+          currentUses: card.currentUses,
           totalUses: card.totalUses,
           isCompleted,
-          message: isCompleted ? "¡Café gratis! Se reinicia el contador." : `Uso ${newCurrentUses} de ${card.totalUses}`
+          canUse: true,
+          message: isCompleted ? "¡Café gratis disponible!" : `Uso ${card.currentUses} de ${card.totalUses}`
         }
       });
     } else if (card.type === 'PREPAID') {
-      const newRemainingUses = (card.remainingUses || 0) - 1;
+      const canUse = card.remainingUses !== null && card.remainingUses > 0;
       
-      await prisma.card.update({
-        where: { id: card.id },
-        data: {
-          remainingUses: newRemainingUses,
-          active: newRemainingUses > 0
-        }
-      });
-
       return NextResponse.json({
         ok: true,
         card: {
@@ -113,9 +98,10 @@ export async function POST(request: NextRequest) {
           code: card.code,
           type: card.type,
           customer: card.customer,
-          remainingUses: newRemainingUses,
-          active: newRemainingUses > 0,
-          message: newRemainingUses > 0 ? `Quedan ${newRemainingUses} usos` : "Último uso completado"
+          remainingUses: card.remainingUses,
+          active: card.active,
+          canUse,
+          message: canUse ? `Quedan ${card.remainingUses} usos` : "No quedan usos disponibles"
         }
       });
     }

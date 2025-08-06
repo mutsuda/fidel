@@ -118,20 +118,20 @@ export default function ValidatePage() {
     setLoading(false);
   };
 
-  const handleAction = async (cardId: string, action: "add" | "sub") => {
+  const handleAction = async (cardId: string, action: "increment" | "decrement") => {
     setLoading(true);
     try {
-      const res = await fetch("/api/validate", {
+      const res = await fetch("/api/validate/card/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cardId, action })
       });
       const data = await res.json();
       if (data.ok && currentResult?.type === 'success' && currentResult.card?.id === cardId) {
-        // Actualizar el resultado actual
+        // Actualizar el resultado actual con la nueva información
         setCurrentResult({
           ...currentResult,
-          card: { ...currentResult.card, uses: data.uses }
+          card: { ...currentResult.card, ...data.card }
         });
       }
     } catch {
@@ -251,6 +251,47 @@ export default function ValidatePage() {
                               {currentResult.card.message}
                             </div>
                           )}
+                          
+                          {/* Botones de acción para tarjetas de cliente */}
+                          <div className="flex gap-2 mt-3">
+                            {currentResult.card.type === 'FIDELITY' ? (
+                              <>
+                                <button
+                                  className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                                  onClick={() => handleAction(currentResult.card.id, "increment")}
+                                  disabled={loading}
+                                >
+                                  +1 Café
+                                </button>
+                                {currentResult.card.currentUses > 0 && (
+                                  <button
+                                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                                    onClick={() => handleAction(currentResult.card.id, "decrement")}
+                                    disabled={loading}
+                                  >
+                                    -1 Café
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                                  onClick={() => handleAction(currentResult.card.id, "decrement")}
+                                  disabled={loading || (currentResult.card.remainingUses || 0) <= 0}
+                                >
+                                  Usar 1
+                                </button>
+                                <button
+                                  className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                                  onClick={() => handleAction(currentResult.card.id, "increment")}
+                                  disabled={loading}
+                                >
+                                  +1 Uso
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         // Tarjeta de lote (sistema antiguo)
@@ -261,20 +302,20 @@ export default function ValidatePage() {
                           
                           {currentResult.card.uses !== null && (
                             <div className="flex gap-2 mt-3">
-                              <button
-                                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                                onClick={() => handleAction(currentResult.card.id, "sub")}
-                                disabled={loading || currentResult.card.uses === 0}
-                              >
-                                -1
-                              </button>
-                              <button
-                                className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-300"
-                                onClick={() => handleAction(currentResult.card.id, "add")}
-                                disabled={loading}
-                              >
-                                +1
-                              </button>
+                                                          <button
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                              onClick={() => handleAction(currentResult.card.id, "decrement")}
+                              disabled={loading || currentResult.card.uses === 0}
+                            >
+                              -1
+                            </button>
+                            <button
+                              className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-300"
+                              onClick={() => handleAction(currentResult.card.id, "increment")}
+                              disabled={loading}
+                            >
+                              +1
+                            </button>
                             </div>
                           )}
                         </div>
