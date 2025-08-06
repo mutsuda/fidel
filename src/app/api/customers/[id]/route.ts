@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest) {
       };
 
       if (cardType === 'FIDELITY') {
-        updateData.totalUses = totalUses || 11;
+        updateData.totalUses = totalUses || 10;
         updateData.currentUses = 0; // Resetear usos
         updateData.remainingUses = null;
         updateData.initialUses = null;

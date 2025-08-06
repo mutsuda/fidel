@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     };
 
     if (cardType === 'FIDELITY') {
-      cardData.totalUses = 11; // 11 cafés = 1 gratis
+              cardData.totalUses = 10; // 10 cafés = el 11º gratis
       cardData.currentUses = 0;
     } else if (cardType === 'PREPAID') {
       cardData.initialUses = initialUses || 10;

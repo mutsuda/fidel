@@ -125,7 +125,7 @@ export default function CustomersPage() {
     if (!card.active) return "Inactiva";
     
     if (card.type === 'FIDELITY') {
-      return `${card.currentUses}/${card.totalUses || 11}`;
+      return `${card.currentUses}/${card.totalUses || 10}`;
     } else if (card.type === 'PREPAID') {
       return `${card.remainingUses || 0} usos restantes`;
     }
@@ -208,7 +208,7 @@ export default function CustomersPage() {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="FIDELITY">Fidelidad (11 cafés = 1 gratis)</option>
+                  <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
                   <option value="PREPAID">Prepago (usos limitados)</option>
                 </select>
               </div>
