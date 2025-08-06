@@ -51,6 +51,12 @@ export default function CustomerWalletPage() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pkpassData, setPkpassData] = useState<any>(null);
+  const [editing, setEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    currentUses: 0,
+    remainingUses: 0,
+    active: true
+  });
 
   useEffect(() => {
     if (!customerId) return;
@@ -131,6 +137,45 @@ export default function CustomerWalletPage() {
     }
   };
 
+  const startEditing = () => {
+    if (walletData) {
+      setEditData({
+        currentUses: walletData.loyalty?.currentUses || 0,
+        remainingUses: walletData.prepaid?.remainingUses || 0,
+        active: walletData.card.active
+      });
+      setEditing(true);
+    }
+  };
+
+  const saveChanges = async () => {
+    if (!walletData) return;
+    
+    try {
+      const response = await fetch(`/api/customers/${customerId}/card`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      });
+      
+      if (response.ok) {
+        setEditing(false);
+        fetchWalletData(); // Recargar datos
+        alert("Cambios guardados correctamente");
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      alert("Error al guardar cambios");
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+  };
+
   const getCardTypeLabel = (type: string) => {
     return type === 'FIDELITY' ? 'Fidelidad' : 'Prepago';
   };
@@ -180,39 +225,119 @@ export default function CustomerWalletPage() {
 
         {/* Información de la tarjeta */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Tarjeta Digital</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Código</label>
-              <p className="font-mono text-lg">{walletData.card.code}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Tipo</label>
-              <p className="text-lg">{getCardTypeLabel(walletData.card.type)}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Estado</label>
-              <p className={`text-lg ${getStatusColor(walletData.loyalty?.isCompleted, walletData.card.active)}`}>
-                {walletData.card.active ? "Activa" : "Inactiva"}
-              </p>
-            </div>
-            
-            {walletData.loyalty && (
-              <div>
-                <label className="text-sm font-medium text-gray-700">Progreso</label>
-                <p className="text-lg">{walletData.loyalty.progress}</p>
-                <p className="text-sm text-gray-600">{walletData.loyalty.message}</p>
-              </div>
-            )}
-            
-            {walletData.prepaid && (
-              <div>
-                <label className="text-sm font-medium text-gray-700">Usos restantes</label>
-                <p className="text-lg">{walletData.prepaid.remainingUses}</p>
-                <p className="text-sm text-gray-600">{walletData.prepaid.message}</p>
-              </div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Tarjeta Digital</h2>
+            {!editing && (
+              <button
+                onClick={startEditing}
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+              >
+                Editar
+              </button>
             )}
           </div>
+          
+          {!editing ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Código</label>
+                <p className="font-mono text-lg">{walletData.card.code}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tipo</label>
+                <p className="text-lg">{getCardTypeLabel(walletData.card.type)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Estado</label>
+                <p className={`text-lg ${getStatusColor(walletData.loyalty?.isCompleted, walletData.card.active)}`}>
+                  {walletData.card.active ? "Activa" : "Inactiva"}
+                </p>
+              </div>
+              
+              {walletData.loyalty && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Progreso</label>
+                  <p className="text-lg">{walletData.loyalty.progress}</p>
+                  <p className="text-sm text-gray-600">{walletData.loyalty.message}</p>
+                </div>
+              )}
+              
+              {walletData.prepaid && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Usos restantes</label>
+                  <p className="text-lg">{walletData.prepaid.remainingUses}</p>
+                  <p className="text-sm text-gray-600">{walletData.prepaid.message}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Código</label>
+                <p className="font-mono text-lg">{walletData.card.code}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tipo</label>
+                <p className="text-lg">{getCardTypeLabel(walletData.card.type)}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-700">Estado</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={editData.active}
+                    onChange={(e) => setEditData({...editData, active: e.target.checked})}
+                    className="rounded"
+                  />
+                  <span className="text-sm">{editData.active ? "Activa" : "Inactiva"}</span>
+                </div>
+              </div>
+              
+              {walletData.loyalty && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Usos actuales (Fidelidad)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={walletData.loyalty.totalUses || 11}
+                    value={editData.currentUses}
+                    onChange={(e) => setEditData({...editData, currentUses: parseInt(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500">Máximo: {walletData.loyalty.totalUses || 11}</p>
+                </div>
+              )}
+              
+              {walletData.prepaid && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Usos restantes (Prepago)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editData.remainingUses}
+                    onChange={(e) => setEditData({...editData, remainingUses: parseInt(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+              
+              <div className="flex space-x-2 pt-2">
+                <button
+                  onClick={saveChanges}
+                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+                >
+                  Guardar
+                </button>
+                <button
+                  onClick={cancelEditing}
+                  className="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* QR Code */}
