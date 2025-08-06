@@ -34,7 +34,28 @@ export async function GET(request: NextRequest) {
     }
 
     if (customer.cards.length === 0) {
-      return NextResponse.json({ error: "Cliente sin tarjetas" }, { status: 404 });
+      // Cliente sin tarjetas - devolver datos básicos
+      const walletData = {
+        customer: {
+          id: customer.id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone
+        },
+        cards: [],
+        qr: {
+          hash: null,
+          dataUrl: null
+        },
+        metadata: {
+          businessName: "Fidel",
+          cardType: "none",
+          lastUpdated: new Date().toISOString(),
+          version: "1.0"
+        }
+      };
+      
+      return NextResponse.json(walletData);
     }
 
     // Procesar todas las tarjetas
