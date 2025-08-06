@@ -32,9 +32,7 @@ export default function CustomersPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    cardType: "FIDELITY" as 'FIDELITY' | 'PREPAID',
-    initialUses: "10"
+    phone: ""
   });
 
   useEffect(() => {
@@ -88,15 +86,10 @@ export default function CustomersPage() {
     e.preventDefault();
     
     try {
-      const body = {
-        ...formData,
-        initialUses: formData.cardType === 'PREPAID' ? parseInt(formData.initialUses) : undefined
-      };
-
       const response = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
@@ -105,9 +98,7 @@ export default function CustomersPage() {
         setFormData({
           name: "",
           email: "",
-          phone: "",
-          cardType: "FIDELITY",
-          initialUses: "10"
+          phone: ""
         });
         setShowForm(false);
         fetchCustomers();
@@ -216,37 +207,6 @@ export default function CustomersPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo de tarjeta
-                </label>
-                <select
-                  name="cardType"
-                  value={formData.cardType}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
-                  <option value="PREPAID">Prepago (usos limitados)</option>
-                </select>
-              </div>
-              
-              {formData.cardType === 'PREPAID' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Usos iniciales
-                  </label>
-                  <input
-                    type="number"
-                    name="initialUses"
-                    value={formData.initialUses}
-                    onChange={handleInputChange}
-                    min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              )}
             </div>
             
             <div className="flex gap-4">

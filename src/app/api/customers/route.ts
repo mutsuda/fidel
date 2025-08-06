@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const customers = await prisma.customer.findMany({
+    const customers = await (prisma as any).customer.findMany({
       where: { userId: session.user.id },
       include: {
         cards: {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, email, phone, cardType, initialUses } = body;
+    const { name, email, phone } = body;
 
     // Validaciones
     if (!name || !email) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar que el email no esté duplicado para este usuario
-    const existingCustomer = await prisma.customer.findFirst({
+    const existingCustomer = await (prisma as any).customer.findFirst({
       where: { 
         email: email.toLowerCase(),
         userId: session.user.id 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear el cliente
-    const customer = await prisma.customer.create({
+    const customer = await (prisma as any).customer.create({
       data: {
         name,
         email: email.toLowerCase(),
@@ -67,47 +67,16 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Generar código único para la tarjeta
-    const generateCode = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let result = '';
-      for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    };
-
-    const generateHash = () => {
-      const crypto = require('crypto');
-      return crypto.randomBytes(32).toString('hex');
-    };
-
-    // Crear la tarjeta
-    const cardData: any = {
-      code: generateCode(),
-      hash: generateHash(),
-      customerId: customer.id,
-      userId: session.user.id,
-      type: cardType || 'FIDELITY',
-      active: true
-    };
-
-    if (cardType === 'FIDELITY') {
-              cardData.totalUses = 10; // 10 cafés = el 11º gratis
-      cardData.currentUses = 0;
-    } else if (cardType === 'PREPAID') {
-      cardData.initialUses = initialUses || 10;
-      cardData.remainingUses = initialUses || 10;
-    }
-
-    const card = await prisma.card.create({
-      data: cardData,
-      include: {
-        customer: true
-      }
+    return NextResponse.json({ 
+      success: true,
+      customer: {
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone
+      },
+      message: "Cliente creado correctamente"
     });
-
-    return NextResponse.json({ customer, card });
   } catch (error) {
     console.error("Error creating customer:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
