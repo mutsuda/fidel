@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const customerId = segments.at(-2) || ""; // El ID está en la posición -2 para /api/customers/[id]/wallet
 
     // Buscar el cliente y todas sus tarjetas
-    const customer = await prisma.customer.findFirst({
+    const customer = await (prisma as any).customer.findFirst({
       where: { 
         id: customerId,
         userId: session.user.id 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Procesar todas las tarjetas
-    const processedCards = customer.cards.map(card => {
+    const processedCards = customer.cards.map((card: any) => {
       const cardData = {
         id: card.id,
         code: card.code,
