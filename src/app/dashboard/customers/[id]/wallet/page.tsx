@@ -374,40 +374,40 @@ export default function CustomerWalletPage() {
   if (!walletData) return <div className="p-6">No se encontraron datos</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       <div className="mb-6">
-                  <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Wallet - {walletData.customer.name}
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Configuración para Apple Wallet
-              </p>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={deleteCustomer}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span>Eliminar Cliente</span>
-              </button>
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Wallet - {walletData.customer.name}
+            </h1>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">
+              Configuración para Apple Wallet
+            </p>
           </div>
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+            <button
+              onClick={deleteCustomer}
+              className="w-full sm:w-auto bg-red-600 text-white px-4 py-3 sm:py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center space-x-2 text-sm sm:text-base"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Eliminar Cliente</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Información del cliente */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Información del Cliente</h2>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold">Información del Cliente</h2>
             {!editingCustomer && (
               <button
                 onClick={startEditingCustomer}
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:px-3 sm:py-1 rounded text-sm hover:bg-blue-700"
               >
                 Editar Cliente
               </button>
@@ -418,16 +418,16 @@ export default function CustomerWalletPage() {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Nombre</label>
-                <p className="text-lg">{walletData.customer.name}</p>
+                <p className="text-base sm:text-lg">{walletData.customer.name}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Email</label>
-                <p className="text-lg">{walletData.customer.email}</p>
+                <p className="text-base sm:text-lg">{walletData.customer.email}</p>
               </div>
               {walletData.customer.phone && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Teléfono</label>
-                  <p className="text-lg">{walletData.customer.phone}</p>
+                  <p className="text-base sm:text-lg">{walletData.customer.phone}</p>
                 </div>
               )}
             </div>
@@ -439,7 +439,7 @@ export default function CustomerWalletPage() {
                   type="text"
                   value={editCustomer.name}
                   onChange={(e) => setEditCustomer({...editCustomer, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                   required
                 />
               </div>
@@ -450,7 +450,7 @@ export default function CustomerWalletPage() {
                   type="email"
                   value={editCustomer.email}
                   onChange={(e) => setEditCustomer({...editCustomer, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                   required
                 />
               </div>
@@ -461,22 +461,20 @@ export default function CustomerWalletPage() {
                   type="tel"
                   value={editCustomer.phone}
                   onChange={(e) => setEditCustomer({...editCustomer, phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 />
               </div>
               
-
-              
-              <div className="flex space-x-2 pt-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
                 <button
                   onClick={saveCustomerChanges}
-                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+                  className="w-full sm:w-auto bg-green-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-green-700"
                 >
                   Guardar Cliente
                 </button>
                 <button
                   onClick={cancelEditingCustomer}
-                  className="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
+                  className="w-full sm:w-auto bg-gray-500 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-gray-600"
                 >
                   Cancelar
                 </button>
@@ -485,36 +483,42 @@ export default function CustomerWalletPage() {
           )}
         </div>
 
-                {/* Tarjetas activas - Vista resumida */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Tarjetas Activas ({walletData.cards.filter(card => card.active).length})</h2>
+        {/* Tarjetas Activas */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold">Tarjetas Activas ({walletData.cards.filter(card => card.active).length})</h2>
             <button
               onClick={createNewCard}
-              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center space-x-1"
+              className="w-full sm:w-auto bg-green-600 text-white px-4 py-3 sm:py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center space-x-2 text-sm sm:text-base"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               <span>Nueva Tarjeta</span>
             </button>
           </div>
           
-          {walletData.cards.length === 0 ? (
+          {walletData.cards.filter(card => card.active).length === 0 ? (
             <div className="text-center py-8">
               <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
-              <p className="text-lg font-medium text-gray-900 mb-2">Sin tarjetas</p>
-              <p className="text-gray-600">Este cliente aún no tiene tarjetas registradas</p>
+              <p className="text-lg font-medium text-gray-900 mb-2">Sin tarjetas activas</p>
+              <p className="text-gray-600 mb-4">Este cliente no tiene tarjetas activas</p>
+              <button
+                onClick={createNewCard}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                Crear Primera Tarjeta
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
-              {walletData.cards.filter(card => card.active).map((card, index) => (
-                <div key={card.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
+              {walletData.cards.filter(card => card.active).map((card) => (
+                <div key={card.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                           card.type === 'FIDELITY' 
                             ? 'bg-blue-100 text-blue-800' 
@@ -529,7 +533,7 @@ export default function CustomerWalletPage() {
                         </span>
                       </div>
                       
-                      <div className="flex items-center space-x-6">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
                         <div>
                           <label className="text-xs font-medium text-gray-700">Código</label>
                           <p className="font-mono text-sm">{card.code}</p>
@@ -548,12 +552,28 @@ export default function CustomerWalletPage() {
                             <p className="text-sm font-medium">{card.prepaid.remainingUses} restantes</p>
                           </div>
                         )}
+                        
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Última validación</label>
+                          <p className="text-sm font-medium">
+                            {card.lastValidation 
+                              ? new Date(card.lastValidation).toLocaleString('es-ES', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : 'Nunca'
+                            }
+                          </p>
+                        </div>
                       </div>
                     </div>
                     
                     <button
                       onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
-                      className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                      className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-blue-700 transition"
                     >
                       Ver Detalles
                     </button>
@@ -562,94 +582,77 @@ export default function CustomerWalletPage() {
               ))}
             </div>
           )}
-          
-          {/* Tarjetas inactivas (si las hay) */}
-          {walletData.cards.filter(card => !card.active).length > 0 && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="text-lg font-medium text-gray-700 mb-3">Tarjetas Inactivas ({walletData.cards.filter(card => !card.active).length})</h3>
-              <div className="space-y-3">
-                {walletData.cards.filter(card => !card.active).map((card) => (
-                  <div key={card.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-4">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800`}>
-                          {getCardTypeLabel(card.type)} - Inactiva
-                        </span>
+        </div>
+        
+        {/* Tarjetas inactivas (si las hay) */}
+        {walletData.cards.filter(card => !card.active).length > 0 && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-lg font-medium text-gray-700 mb-3">Tarjetas Inactivas ({walletData.cards.filter(card => !card.active).length})</h3>
+            <div className="space-y-3">
+              {walletData.cards.filter(card => !card.active).map((card) => (
+                <div key={card.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800`}>
+                        {getCardTypeLabel(card.type)} - Inactiva
+                      </span>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Código</label>
+                          <p className="font-mono text-sm">{card.code}</p>
+                        </div>
                         
-                        <div className="flex items-center space-x-6">
+                        {card.loyalty && (
                           <div>
-                            <label className="text-xs font-medium text-gray-700">Código</label>
-                            <p className="font-mono text-sm">{card.code}</p>
+                            <label className="text-xs font-medium text-gray-700">Progreso</label>
+                            <p className="text-sm font-medium">{card.loyalty.progress}</p>
                           </div>
-                          
-                          {card.loyalty && (
-                            <div>
-                              <label className="text-xs font-medium text-gray-700">Progreso</label>
-                              <p className="text-sm font-medium">{card.loyalty.progress}</p>
-                            </div>
-                          )}
-                          
-                          {card.prepaid && (
-                            <div>
-                              <label className="text-xs font-medium text-gray-700">Usos</label>
-                              <p className="text-sm font-medium">{card.prepaid.remainingUses} restantes</p>
-                            </div>
-                          )}
-                          
+                        )}
+                        
+                        {card.prepaid && (
                           <div>
-                            <label className="text-xs font-medium text-gray-700">Última validación</label>
-                            <p className="text-sm font-medium">
-                              {card.lastValidation 
-                                ? new Date(card.lastValidation).toLocaleString('es-ES', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })
-                                : 'Nunca'
-                              }
-                            </p>
+                            <label className="text-xs font-medium text-gray-700">Usos</label>
+                            <p className="text-sm font-medium">{card.prepaid.remainingUses} restantes</p>
                           </div>
-                          
-                          <div>
-                            <label className="text-xs font-medium text-gray-700">Última validación</label>
-                            <p className="text-sm font-medium">
-                              {card.lastValidation 
-                                ? new Date(card.lastValidation).toLocaleString('es-ES', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })
-                                : 'Nunca'
-                              }
-                            </p>
-                          </div>
+                        )}
+                        
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Última validación</label>
+                          <p className="text-sm font-medium">
+                            {card.lastValidation 
+                              ? new Date(card.lastValidation).toLocaleString('es-ES', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : 'Nunca'
+                            }
+                          </p>
                         </div>
                       </div>
-                      
-                      <button
-                        onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
-                        className="bg-gray-600 text-white px-4 py-2 rounded text-sm hover:bg-gray-700 transition"
-                      >
-                        Ver Detalles
-                      </button>
                     </div>
+                    
+                    <button
+                      onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
+                      className="w-full sm:w-auto bg-gray-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-gray-700 transition"
+                    >
+                      Ver Detalles
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-
+          </div>
+        )}
       </div>
 
       {/* Modal para crear nueva tarjeta */}
       {showCreateCardModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4">Crear Nueva Tarjeta</h3>
             
             <div className="space-y-4">
@@ -667,7 +670,7 @@ export default function CustomerWalletPage() {
                       initialUses: newType === 'PREPAID' ? 10 : newCardData.initialUses
                     });
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 >
                   <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
                   <option value="PREPAID">Prepago (usos limitados)</option>
@@ -682,7 +685,7 @@ export default function CustomerWalletPage() {
                     min="1"
                     value={newCardData.totalUses}
                     onChange={(e) => setNewCardData({...newCardData, totalUses: parseInt(e.target.value) || 10})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                   />
                   <p className="text-xs text-gray-500 mt-1">Ej: 10 cafés = el 11º gratis</p>
                 </div>
@@ -696,22 +699,22 @@ export default function CustomerWalletPage() {
                     min="1"
                     value={newCardData.initialUses}
                     onChange={(e) => setNewCardData({...newCardData, initialUses: parseInt(e.target.value) || 10})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                   />
                 </div>
               )}
             </div>
             
-            <div className="flex space-x-3 mt-6">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-6">
               <button
                 onClick={handleCreateCard}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+                className="flex-1 bg-green-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-green-700"
               >
                 Crear Tarjeta
               </button>
               <button
                 onClick={cancelCreateCard}
-                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
+                className="flex-1 bg-gray-500 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-gray-600"
               >
                 Cancelar
               </button>
