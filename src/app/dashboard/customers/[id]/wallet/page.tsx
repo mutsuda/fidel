@@ -239,7 +239,9 @@ export default function CustomerWalletPage() {
 
   const createNewCard = async () => {
     console.log("createNewCard clicked");
+    console.log("showCreateCardModal before:", showCreateCardModal);
     setShowCreateCardModal(true);
+    console.log("showCreateCardModal after setState:", showCreateCardModal);
   };
 
   const handleCreateCard = async () => {
@@ -509,82 +511,7 @@ export default function CustomerWalletPage() {
           </div>
               </div>
 
-      {/* Modal para crear nueva tarjeta */}
-      {showCreateCardModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">Crear Nueva Tarjeta</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Tipo de tarjeta</label>
-                <select
-                  value={newCardData.cardType}
-                  onChange={(e) => {
-                    const newType = e.target.value as 'FIDELITY' | 'PREPAID';
-                    setNewCardData({
-                      ...newCardData,
-                      cardType: newType,
-                      // Resetear valores según el nuevo tipo
-                      totalUses: newType === 'FIDELITY' ? 10 : newCardData.totalUses,
-                      initialUses: newType === 'PREPAID' ? 10 : newCardData.initialUses
-                    });
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
-                  <option value="PREPAID">Prepago (usos limitados)</option>
-                </select>
-              </div>
-              
-              {newCardData.cardType === 'FIDELITY' && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Cafés para completar (el siguiente será gratis)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={newCardData.totalUses}
-                    onChange={(e) => setNewCardData({...newCardData, totalUses: parseInt(e.target.value) || 10})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Ej: 10 cafés = el 11º gratis</p>
-                </div>
-              )}
-              
-              {newCardData.cardType === 'PREPAID' && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Usos iniciales</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={newCardData.initialUses}
-                    onChange={(e) => setNewCardData({...newCardData, initialUses: parseInt(e.target.value) || 10})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              )}
-            </div>
-            
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={handleCreateCard}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
-              >
-                Crear Tarjeta
-              </button>
-              <button
-                onClick={cancelCreateCard}
-                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -857,10 +784,81 @@ export default function CustomerWalletPage() {
           )}
         </div>
 
-
       </div>
 
-
+      {/* Modal para crear nueva tarjeta */}
+      {showCreateCardModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">Crear Nueva Tarjeta</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tipo de tarjeta</label>
+                <select
+                  value={newCardData.cardType}
+                  onChange={(e) => {
+                    const newType = e.target.value as 'FIDELITY' | 'PREPAID';
+                    setNewCardData({
+                      ...newCardData,
+                      cardType: newType,
+                      // Resetear valores según el nuevo tipo
+                      totalUses: newType === 'FIDELITY' ? 10 : newCardData.totalUses,
+                      initialUses: newType === 'PREPAID' ? 10 : newCardData.initialUses
+                    });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="FIDELITY">Fidelidad (10 cafés = el 11º gratis)</option>
+                  <option value="PREPAID">Prepago (usos limitados)</option>
+                </select>
+              </div>
+              
+              {newCardData.cardType === 'FIDELITY' && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Cafés para completar (el siguiente será gratis)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newCardData.totalUses}
+                    onChange={(e) => setNewCardData({...newCardData, totalUses: parseInt(e.target.value) || 10})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Ej: 10 cafés = el 11º gratis</p>
+                </div>
+              )}
+              
+              {newCardData.cardType === 'PREPAID' && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Usos iniciales</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newCardData.initialUses}
+                    onChange={(e) => setNewCardData({...newCardData, initialUses: parseInt(e.target.value) || 10})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={handleCreateCard}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+              >
+                Crear Tarjeta
+              </button>
+              <button
+                onClick={cancelCreateCard}
+                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
