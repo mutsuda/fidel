@@ -861,4 +861,4 @@ export default function CustomerWalletPage() {
       )}
     </div>
   );
-} 
+}
