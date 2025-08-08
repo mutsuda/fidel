@@ -16,8 +16,7 @@ export async function GET(request: NextRequest) {
       where: { userId: session.user.id },
       include: {
         cards: {
-          orderBy: { createdAt: 'desc' },
-          take: 1 // Solo la tarjeta más reciente
+          orderBy: { createdAt: 'desc' }
         }
       },
       orderBy: { createdAt: 'desc' }
