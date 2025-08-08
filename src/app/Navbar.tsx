@@ -39,8 +39,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight select-none">
-            Shokupan
+          <Link href="/" className="flex items-center space-x-2 select-none">
+            <img src="/icon.png" alt="Shokupan" className="w-8 h-8" />
+            <span className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight">Shokupan</span>
           </Link>
 
           {/* Desktop Menu */}

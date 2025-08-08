@@ -17,6 +17,8 @@ export default function RootLayout({
       <head>
         <title>Shokupan - Tarjetas de Fidelidad</title>
         <meta name="description" content="Crea, personaliza y valida tarjetas de fidelidad con QR seguro" />
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
       </head>
       <body className="bg-gray-50 font-sans text-gray-900">
         <SessionProvider>
