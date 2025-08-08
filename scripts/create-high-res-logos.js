@@ -30,17 +30,31 @@ function drawNavbarLogo(ctx, width, height) {
   ctx.fill();
   ctx.stroke();
   
-  // Líneas del pan
+  // Líneas del pan - ajustadas para mantener proporción
   ctx.strokeStyle = '#8B4513';
   ctx.lineWidth = 1.6;
   ctx.globalAlpha = 0.6;
   
-  for (let i = 0; i < 4; i++) {
-    ctx.beginPath();
-    ctx.moveTo(12, 16 + i * 12);
-    ctx.lineTo(52, 16 + i * 12);
-    ctx.stroke();
-  }
+  // Líneas que respetan el borde del pan
+  ctx.beginPath();
+  ctx.moveTo(8, 16);
+  ctx.lineTo(56, 16);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(8, 28);
+  ctx.lineTo(56, 28);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(8, 40);
+  ctx.lineTo(56, 40);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(8, 52);
+  ctx.lineTo(56, 52);
+  ctx.stroke();
   
   // S estilizada
   ctx.globalAlpha = 1;
@@ -80,17 +94,36 @@ function drawLandingLogo(ctx, width, height) {
   ctx.fill();
   ctx.stroke();
   
-  // Líneas del pan
+  // Líneas del pan - ajustadas para mantener proporción
   ctx.strokeStyle = '#8B4513';
   ctx.lineWidth = 2.4;
   ctx.globalAlpha = 0.6;
   
-  for (let i = 0; i < 4; i++) {
-    ctx.beginPath();
-    ctx.moveTo(18, 24 + i * 18);
-    ctx.lineTo(78, 24 + i * 18);
-    ctx.stroke();
-  }
+  // Líneas que respetan el borde del pan
+  ctx.beginPath();
+  ctx.moveTo(12, 24);
+  ctx.lineTo(84, 24);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(12, 36);
+  ctx.lineTo(84, 36);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(12, 48);
+  ctx.lineTo(84, 48);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(12, 60);
+  ctx.lineTo(84, 60);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(12, 72);
+  ctx.lineTo(84, 72);
+  ctx.stroke();
   
   // S estilizada
   ctx.globalAlpha = 1;
