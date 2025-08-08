@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import QRCode from "qrcode";
 
 interface Customer {
   id: string;
@@ -28,7 +27,6 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,8 +43,6 @@ export default function CustomersPage() {
       if (response.ok) {
         const data = await response.json();
         setCustomers(data);
-        // Generar QR codes para cada cliente
-        generateQRCodes(data);
       } else {
         console.error("Error fetching customers");
       }
@@ -55,23 +51,6 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateQRCodes = async (customersData: Customer[]) => {
-    const newQrCodes: { [key: string]: string } = {};
-    
-    for (const customer of customersData) {
-      if (customer.cards.length > 0) {
-        try {
-          const qrDataUrl = await QRCode.toDataURL(customer.cards[0].hash);
-          newQrCodes[customer.id] = qrDataUrl;
-        } catch (error) {
-          console.error("Error generating QR for customer:", customer.id, error);
-        }
-      }
-    }
-    
-    setQrCodes(newQrCodes);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -263,38 +242,30 @@ export default function CustomersPage() {
                   </div>
                   
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                    {/* Información de la tarjeta */}
+                    {/* Estadísticas de tarjetas */}
                     <div className="text-left sm:text-right">
                       {customer.cards.length > 0 ? (
-                        <div>
+                        <div className="space-y-1">
                           <div className="text-xs sm:text-sm text-gray-600">
-                            {getCardTypeLabel(customer.cards[0].type)}
+                            {customer.cards.length} tarjeta{customer.cards.length !== 1 ? 's' : ''}
                           </div>
-                          <div className={`text-xs sm:text-sm font-medium ${
-                            customer.cards[0].active ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {getCardStatus(customer.cards[0])}
+                          <div className="text-xs sm:text-sm text-green-600 font-medium">
+                            {customer.cards.filter(card => card.active).length} activa{customer.cards.filter(card => card.active).length !== 1 ? 's' : ''}
                           </div>
-                          <div className="text-xs text-gray-500 font-mono">
-                            {customer.cards[0].code}
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            {customer.cards.filter(card => !card.active).length} inactiva{customer.cards.filter(card => !card.active).length !== 1 ? 's' : ''}
                           </div>
+                          {/* Mostrar tipo de tarjeta más común */}
+                          {customer.cards.length > 0 && (
+                            <div className="text-xs text-gray-500">
+                              {getCardTypeLabel(customer.cards[0].type)}
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <div className="text-xs sm:text-sm text-gray-500">Sin tarjeta</div>
+                        <div className="text-xs sm:text-sm text-gray-500">Sin tarjetas</div>
                       )}
                     </div>
-                    
-                    {/* QR Code - Solo en desktop */}
-                    {customer.cards.length > 0 && qrCodes[customer.id] && (
-                      <div className="hidden sm:flex flex-col items-center">
-                        <img 
-                          src={qrCodes[customer.id]} 
-                          alt="QR Code" 
-                          className="w-16 h-16 border border-gray-200 rounded"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">QR para escanear</p>
-                      </div>
-                    )}
                     
                     {/* Indicador de click */}
                     <div className="flex items-center text-blue-600">
@@ -309,7 +280,7 @@ export default function CustomersPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (confirm(`¿Estás seguro de que quieres eliminar a ${customer.name} y su tarjeta?`)) {
+                        if (confirm(`¿Estás seguro de que quieres eliminar a ${customer.name} y todas sus tarjetas?`)) {
                           deleteCustomer(customer.id);
                         }
                       }}
