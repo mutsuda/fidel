@@ -36,7 +36,7 @@ export default function Navbar() {
 
   return (
     <nav ref={navRef} className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm mb-6">
-      <div className="max-w-5xl mx-auto px-4 py-3 sm:py-2">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight select-none">
