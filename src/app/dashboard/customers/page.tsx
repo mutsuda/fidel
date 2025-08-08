@@ -248,20 +248,15 @@ export default function CustomersPage() {
                       {customer.cards.length > 0 ? (
                         <div className="space-y-1">
                           <div className="text-xs sm:text-sm text-gray-600">
-                            {customer.cards.length} tarjeta{customer.cards.length !== 1 ? 's' : ''}
+                            Tarjetas activas: {customer.cards.filter(card => card.active === true).length}
                           </div>
-                          <div className="text-xs sm:text-sm text-green-600 font-medium">
-                            {customer.cards.filter(card => card.active === true).length} activa{customer.cards.filter(card => card.active === true).length !== 1 ? 's' : ''}
-                          </div>
-                          <div className="text-xs sm:text-sm text-gray-500">
-                            {customer.cards.filter(card => card.active === false).length} inactiva{customer.cards.filter(card => card.active === false).length !== 1 ? 's' : ''}
-                          </div>
-                          {/* Mostrar tipos de tarjetas */}
-                          {customer.cards.length > 0 && (
+                          {/* Mostrar tipos de tarjetas activas */}
+                          {customer.cards.filter(card => card.active === true).length > 0 && (
                             <div className="text-xs text-gray-500">
                               {(() => {
-                                const fidelityCount = customer.cards.filter(card => card.type === 'FIDELITY').length;
-                                const prepaidCount = customer.cards.filter(card => card.type === 'PREPAID').length;
+                                const activeCards = customer.cards.filter(card => card.active === true);
+                                const fidelityCount = activeCards.filter(card => card.type === 'FIDELITY').length;
+                                const prepaidCount = activeCards.filter(card => card.type === 'PREPAID').length;
                                 if (fidelityCount > 0 && prepaidCount > 0) {
                                   return `${fidelityCount} Fidelidad, ${prepaidCount} Prepago`;
                                 } else if (fidelityCount > 0) {
@@ -269,7 +264,7 @@ export default function CustomersPage() {
                                 } else if (prepaidCount > 0) {
                                   return `${prepaidCount} Prepago`;
                                 }
-                                return getCardTypeLabel(customer.cards[0].type);
+                                return '';
                               })()}
                             </div>
                           )}

@@ -486,7 +486,7 @@ export default function CustomerWalletPage() {
         {/* Tarjetas Activas */}
         <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <h2 className="text-lg sm:text-xl font-semibold">Tarjetas activas: {walletData.cards.filter(card => card.active).length}</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Tarjetas Activas ({walletData.cards.filter(card => card.active).length})</h2>
             <button
               onClick={createNewCard}
               className="w-full sm:w-auto bg-green-600 text-white px-4 py-3 sm:py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center space-x-2 text-sm sm:text-base"
@@ -525,6 +525,11 @@ export default function CustomerWalletPage() {
                             : 'bg-green-100 text-green-800'
                         }`}>
                           {getCardTypeLabel(card.type)}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          card.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {card.active ? 'Activa' : 'Inactiva'}
                         </span>
                       </div>
                       
@@ -578,6 +583,70 @@ export default function CustomerWalletPage() {
             </div>
           )}
         </div>
+        
+        {/* Tarjetas inactivas (si las hay) */}
+        {walletData.cards.filter(card => !card.active).length > 0 && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-lg font-medium text-gray-700 mb-3">Tarjetas Inactivas ({walletData.cards.filter(card => !card.active).length})</h3>
+            <div className="space-y-3">
+              {walletData.cards.filter(card => !card.active).map((card) => (
+                <div key={card.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800`}>
+                        {getCardTypeLabel(card.type)} - Inactiva
+                      </span>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Código</label>
+                          <p className="font-mono text-sm">{card.code}</p>
+                        </div>
+                        
+                        {card.loyalty && (
+                          <div>
+                            <label className="text-xs font-medium text-gray-700">Progreso</label>
+                            <p className="text-sm font-medium">{card.loyalty.progress}</p>
+                          </div>
+                        )}
+                        
+                        {card.prepaid && (
+                          <div>
+                            <label className="text-xs font-medium text-gray-700">Usos</label>
+                            <p className="text-sm font-medium">{card.prepaid.remainingUses} restantes</p>
+                          </div>
+                        )}
+                        
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Última validación</label>
+                          <p className="text-sm font-medium">
+                            {card.lastValidation 
+                              ? new Date(card.lastValidation).toLocaleString('es-ES', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : 'Nunca'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
+                      className="w-full sm:w-auto bg-gray-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-gray-700 transition"
+                    >
+                      Ver Detalles
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal para crear nueva tarjeta */}
