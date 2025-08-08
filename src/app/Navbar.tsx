@@ -1,12 +1,31 @@
 "use client";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Cerrar menús cuando se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+        setShowMobileMenu(false);
+      }
+    };
+
+    if (showProfileMenu || showMobileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileMenu, showMobileMenu]);
 
   // No mostrar navbar si no está autenticado
   if (status === "loading" || status === "unauthenticated") {
@@ -14,7 +33,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm mb-6">
+    <nav ref={navRef} className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm mb-6">
       <div className="max-w-5xl mx-auto px-4 py-3 sm:py-2">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -92,7 +111,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {showMobileMenu && (
-          <div className="md:hidden mt-4 pb-4 border-t border-gray-200">
+          <div className="md:hidden mt-4 pb-4 border-t border-gray-200 relative z-50">
             <div className="flex flex-col space-y-3 pt-4">
               <Link 
                 href="/dashboard/batches" 
@@ -128,7 +147,7 @@ export default function Navbar() {
 
         {/* Mobile Profile Menu */}
         {showProfileMenu && (
-          <div className="md:hidden mt-4 pb-4 border-t border-gray-200">
+          <div className="md:hidden mt-4 pb-4 border-t border-gray-200 relative z-50">
             <div className="pt-4">
               <div className="px-3 py-2 text-sm text-gray-500">
                 {session?.user?.email}
@@ -146,17 +165,6 @@ export default function Navbar() {
           </div>
         )}
       </div>
-      
-      {/* Click outside to close menus */}
-      {(showProfileMenu || showMobileMenu) && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => {
-            setShowProfileMenu(false);
-            setShowMobileMenu(false);
-          }}
-        />
-      )}
     </nav>
   );
 } 
