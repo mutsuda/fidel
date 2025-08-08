@@ -40,7 +40,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight select-none">
-            Fidel
+            Shokupan
           </Link>
 
           {/* Desktop Menu */}

@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <title>Fidel - Tarjetas de Fidelidad</title>
+        <title>Shokupan - Tarjetas de Fidelidad</title>
         <meta name="description" content="Crea, personaliza y valida tarjetas de fidelidad con QR seguro" />
       </head>
       <body className="bg-gray-50 font-sans text-gray-900">

@@ -54,10 +54,10 @@ export async function GET(request: NextRequest) {
     // Crear estructura PKPass (sin certificados por ahora)
     const passData = {
       formatVersion: 1,
-      passTypeIdentifier: "pass.com.fidel.loyalty", // Se cambiará cuando tengas certificados
+      passTypeIdentifier: "pass.com.shokupan.loyalty", // Se cambiará cuando tengas certificados
       serialNumber: card.hash,
       teamIdentifier: "TEAM123", // Se cambiará cuando tengas certificados
-      organizationName: "Fidel",
+      organizationName: "Shokupan",
       description: `Tarjeta de ${card.type === 'FIDELITY' ? 'fidelidad' : 'prepago'} para ${customer.name}`,
       generic: {
         primaryFields: [

@@ -33,16 +33,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Generar QR code para esta tarjeta específica
-    const qrDataUrl = `https://fidel-one.vercel.app/api/validate/card?hash=${card.hash}`;
+    const qrDataUrl = `https://shokupan.vercel.app/api/validate/card?hash=${card.hash}`;
 
     // Estructura PKPass para esta tarjeta específica
     const passData = {
       formatVersion: 1,
-      passTypeIdentifier: "pass.com.fidel.loyalty", // Requiere certificado Apple
-      teamIdentifier: "TEAM_ID", // Requiere certificado Apple
-      organizationName: "Fidel",
+      passTypeIdentifier: "pass.com.shokupan.loyalty", // Requiere certificado Apple
+      teamIdentifier: "TEAM123", // Requiere certificado Apple
+      organizationName: "Shokupan",
       description: `Tarjeta de ${card.customer.name}`,
-      serialNumber: card.code,
+      serialNumber: card.hash,
       generic: {
         primaryFields: [
           {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
           relevantText: "Escanea aquí para usar tu tarjeta"
         }
       ],
-      webServiceURL: "https://fidel-one.vercel.app/api/wallet/webhook",
+      webServiceURL: "https://shokupan.vercel.app/api/wallet/webhook",
       authenticationToken: "TOKEN", // Requiere certificado Apple
       expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
       voided: !card.active

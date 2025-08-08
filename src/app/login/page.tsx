@@ -43,12 +43,11 @@ export default function LoginPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
           {/* Left side - Brand & Description */}
-          <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold mb-6 text-blue-700 tracking-tight">Fidel</h1>
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-6 text-blue-700 tracking-tight">Shokupan</h1>
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Tarjetas de Fidelidad Inteligentes</h2>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              Crea, personaliza y valida tarjetas de fidelidad con QR seguro para tu negocio. 
-              Sube tu diseño, genera cientos de tarjetas únicas y descárgalas listas para imprenta.
+            <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+              Crea, personaliza y valida tarjetas de fidelidad con QR seguro para tu negocio.
             </p>
             
             <div className="space-y-4 text-left">

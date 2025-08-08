@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
           dataUrl: null
         },
         metadata: {
-          businessName: "Fidel",
+          businessName: "Shokupan",
           cardType: "none",
           lastUpdated: new Date().toISOString(),
           version: "1.0"
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       
       // Metadatos para Wallet
       metadata: {
-        businessName: "Fidel", // Se puede personalizar
+        businessName: "Shokupan", // Se puede personalizar
         cardType: customer.cards[0].type === 'FIDELITY' ? 'loyalty' : 'prepaid',
         lastUpdated: new Date().toISOString(),
         version: "1.0"
