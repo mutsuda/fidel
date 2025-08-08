@@ -45,7 +45,7 @@ export default function LoginPage() {
           {/* Left side - Brand & Description */}
           <div className="text-center">
             <div className="flex items-center justify-center mb-6">
-              <img src="/icon.png" alt="Shokupan" className="w-12 h-12 mr-4" />
+              <img src="/logo-landing.png" alt="Shokupan" className="w-16 h-16 mr-6" />
               <h1 className="text-5xl font-bold text-blue-700 tracking-tight">Shokupan</h1>
             </div>
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Tarjetas de Fidelidad Inteligentes</h2>
