@@ -25,8 +25,10 @@ interface Card {
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,6 +38,20 @@ export default function CustomersPage() {
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  // Filtrar clientes cuando cambie el término de búsqueda
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredCustomers(customers);
+    } else {
+      const filtered = customers.filter(customer => 
+        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (customer.phone && customer.phone.includes(searchTerm))
+      );
+      setFilteredCustomers(filtered);
+    }
+  }, [searchTerm, customers]);
 
   const fetchCustomers = async () => {
     try {
@@ -131,14 +147,58 @@ export default function CustomersPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Clientes</h1>
+      {/* Header con título y botón */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Clientes</h1>
+          <p className="text-gray-600 mt-1">Gestiona tus clientes y sus tarjetas de fidelidad</p>
+        </div>
+        
         <button
-          onClick={() => setShowForm(!showForm)}
-          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:px-4 sm:py-2 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
+          onClick={() => setShowForm(true)}
+          className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 sm:py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2 text-base"
         >
-          {showForm ? "Cancelar" : "Registrar Cliente"}
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Nuevo Cliente</span>
         </button>
+      </div>
+
+      {/* Buscador */}
+      <div className="mb-6">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nombre, email o teléfono..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {searchTerm && (
+          <div className="mt-2 text-sm text-gray-600">
+            {filteredCustomers.length === 1 
+              ? "1 cliente encontrado" 
+              : `${filteredCustomers.length} clientes encontrados`
+            }
+          </div>
+        )}
       </div>
 
       {/* Formulario de registro */}
@@ -212,17 +272,17 @@ export default function CustomersPage() {
       <div className="bg-white rounded-lg shadow">
         <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-            Clientes registrados ({customers.length})
+            Clientes registrados ({filteredCustomers.length})
           </h2>
         </div>
         
-        {customers.length === 0 ? (
+        {filteredCustomers.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
-            No hay clientes registrados. Registra tu primer cliente para empezar.
+            {searchTerm ? "No se encontraron clientes con esa búsqueda." : "No hay clientes registrados. Registra tu primer cliente para empezar."}
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {customers.map((customer) => (
+            {filteredCustomers.map((customer) => (
               <Link 
                 key={customer.id} 
                 href={`/dashboard/customers/${customer.id}/wallet`}
