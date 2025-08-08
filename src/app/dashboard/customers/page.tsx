@@ -42,6 +42,7 @@ export default function CustomersPage() {
       const response = await fetch("/api/customers");
       if (response.ok) {
         const data = await response.json();
+        console.log("Customers data:", data); // Debug temporal
         setCustomers(data);
       } else {
         console.error("Error fetching customers");
@@ -250,15 +251,26 @@ export default function CustomersPage() {
                             {customer.cards.length} tarjeta{customer.cards.length !== 1 ? 's' : ''}
                           </div>
                           <div className="text-xs sm:text-sm text-green-600 font-medium">
-                            {customer.cards.filter(card => card.active).length} activa{customer.cards.filter(card => card.active).length !== 1 ? 's' : ''}
+                            {customer.cards.filter(card => card.active === true).length} activa{customer.cards.filter(card => card.active === true).length !== 1 ? 's' : ''}
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
-                            {customer.cards.filter(card => !card.active).length} inactiva{customer.cards.filter(card => !card.active).length !== 1 ? 's' : ''}
+                            {customer.cards.filter(card => card.active === false).length} inactiva{customer.cards.filter(card => card.active === false).length !== 1 ? 's' : ''}
                           </div>
-                          {/* Mostrar tipo de tarjeta más común */}
+                          {/* Mostrar tipos de tarjetas */}
                           {customer.cards.length > 0 && (
                             <div className="text-xs text-gray-500">
-                              {getCardTypeLabel(customer.cards[0].type)}
+                              {(() => {
+                                const fidelityCount = customer.cards.filter(card => card.type === 'FIDELITY').length;
+                                const prepaidCount = customer.cards.filter(card => card.type === 'PREPAID').length;
+                                if (fidelityCount > 0 && prepaidCount > 0) {
+                                  return `${fidelityCount} Fidelidad, ${prepaidCount} Prepago`;
+                                } else if (fidelityCount > 0) {
+                                  return `${fidelityCount} Fidelidad`;
+                                } else if (prepaidCount > 0) {
+                                  return `${prepaidCount} Prepago`;
+                                }
+                                return getCardTypeLabel(customer.cards[0].type);
+                              })()}
                             </div>
                           )}
                         </div>
