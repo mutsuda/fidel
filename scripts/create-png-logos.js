@@ -199,11 +199,6 @@ function drawStripLogo(ctx, width, height) {
   ctx.font = 'bold 32px Arial';
   ctx.fillText('Shokupan', 130, 70);
   
-  // Subtítulo
-  ctx.font = '16px Arial';
-  ctx.globalAlpha = 0.8;
-  ctx.fillText('Tarjetas de Fidelidad', 130, 95);
-  
   // Elementos decorativos adicionales
   ctx.globalAlpha = 0.3;
   ctx.fillStyle = '#8B4513';
