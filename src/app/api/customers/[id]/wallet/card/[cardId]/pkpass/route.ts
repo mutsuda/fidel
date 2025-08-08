@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Generar QR code para esta tarjeta específica
-    const qrDataUrl = `https://shokupan.vercel.app/api/validate/card?hash=${card.hash}`;
+    const qrDataUrl = `https://shokupan.es/api/validate/card?hash=${card.hash}`;
 
     // Estructura PKPass para esta tarjeta específica
     const passData = {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
           relevantText: "Escanea aquí para usar tu tarjeta"
         }
       ],
-      webServiceURL: "https://shokupan.vercel.app/api/wallet/webhook",
+      webServiceURL: "https://shokupan.es/api/wallet/webhook",
       authenticationToken: "TOKEN", // Requiere certificado Apple
       expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
       voided: !card.active
