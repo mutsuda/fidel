@@ -369,7 +369,7 @@ export default function CustomerWalletPage() {
     return 'text-blue-600';
   };
 
-  if (loading) return <div className="p-6">Cargando datos de Wallet...</div>;
+  if (loading) return <div className="p-6">Cargando datos del cliente...</div>;
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
   if (!walletData) return <div className="p-6">No se encontraron datos</div>;
 
@@ -379,10 +379,10 @@ export default function CustomerWalletPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Wallet - {walletData.customer.name}
+              {walletData.customer.name}
             </h1>
             <p className="text-gray-600 mt-2 text-sm sm:text-base">
-              Configuración para Apple Wallet
+              Configuración de tarjetas
             </p>
           </div>
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
