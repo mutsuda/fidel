@@ -146,12 +146,6 @@ export default function TemplatesPage() {
                     >
                       Ver Detalles
                     </Link>
-                    <Link
-                      href={`/dashboard/templates/${template.id}/passbook`}
-                      className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition text-center"
-                    >
-                      🎨 Diseñar Passbook
-                    </Link>
                     <button
                       onClick={() => handleDeleteTemplate(template.id, template.name)}
                       className="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 transition"

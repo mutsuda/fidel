@@ -31,6 +31,39 @@ export default function Navbar() {
     };
   }, [showProfileMenu, showMobileMenu, showBatchesMenu, showPassbookMenu]);
 
+  // Cerrar otros menús cuando se abre uno
+  const handleMenuToggle = (menuType: 'batches' | 'passbook' | 'profile' | 'mobile') => {
+    if (menuType === 'batches') {
+      setShowBatchesMenu(!showBatchesMenu);
+      setShowPassbookMenu(false);
+      setShowProfileMenu(false);
+      setShowMobileMenu(false);
+    } else if (menuType === 'passbook') {
+      setShowPassbookMenu(!showPassbookMenu);
+      setShowBatchesMenu(false);
+      setShowProfileMenu(false);
+      setShowMobileMenu(false);
+    } else if (menuType === 'profile') {
+      setShowProfileMenu(!showProfileMenu);
+      setShowBatchesMenu(false);
+      setShowPassbookMenu(false);
+      setShowMobileMenu(false);
+    } else if (menuType === 'mobile') {
+      setShowMobileMenu(!showMobileMenu);
+      setShowBatchesMenu(false);
+      setShowPassbookMenu(false);
+      setShowProfileMenu(false);
+    }
+  };
+
+  // Cerrar menús cuando se hace clic en un enlace
+  const handleMenuClose = () => {
+    setShowBatchesMenu(false);
+    setShowPassbookMenu(false);
+    setShowProfileMenu(false);
+    setShowMobileMenu(false);
+  };
+
   // No mostrar navbar si no está autenticado
   if (status === "loading" || status === "unauthenticated") {
     return null;
@@ -51,7 +84,7 @@ export default function Navbar() {
             {/* Lotes Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setShowBatchesMenu(!showBatchesMenu)}
+                onClick={() => handleMenuToggle('batches')}
                 className="flex items-center gap-1 text-gray-700 hover:text-blue-700 font-medium transition text-sm"
               >
                 Lotes
@@ -65,14 +98,14 @@ export default function Navbar() {
                   <Link
                     href="/dashboard/batches"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-                    onClick={() => setShowBatchesMenu(false)}
+                    onClick={handleMenuClose}
                   >
                     Gestionar Lotes
                   </Link>
                   <Link
                     href="/dashboard/templates"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-                    onClick={() => setShowBatchesMenu(false)}
+                    onClick={handleMenuClose}
                   >
                     Plantillas de Lotes
                   </Link>
@@ -83,7 +116,7 @@ export default function Navbar() {
             {/* Passbook Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setShowPassbookMenu(!showPassbookMenu)}
+                onClick={() => handleMenuToggle('passbook')}
                 className="flex items-center gap-1 text-gray-700 hover:text-blue-700 font-medium transition text-sm"
               >
                 Passbook
@@ -97,14 +130,14 @@ export default function Navbar() {
                   <Link
                     href="/dashboard/passbook/fidelity"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-                    onClick={() => setShowPassbookMenu(false)}
+                    onClick={handleMenuClose}
                   >
                     Diseño Fidelidad
                   </Link>
                   <Link
                     href="/dashboard/passbook/prepaid"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-                    onClick={() => setShowPassbookMenu(false)}
+                    onClick={handleMenuClose}
                   >
                     Diseño Prepago
                   </Link>
@@ -122,7 +155,7 @@ export default function Navbar() {
             {/* Desktop Profile Menu */}
             <div className="relative">
               <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                onClick={() => handleMenuToggle('profile')}
                 className="flex items-center gap-2 text-gray-700 hover:text-blue-700 font-medium transition"
               >
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-sm">
@@ -154,7 +187,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-3">
             {/* Mobile Profile Button */}
             <button
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              onClick={() => handleMenuToggle('mobile')}
               className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-sm"
             >
               {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || "U"}
@@ -162,7 +195,7 @@ export default function Navbar() {
             
             {/* Hamburger Menu */}
             <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              onClick={() => handleMenuToggle('mobile')}
               className="text-gray-700 hover:text-blue-700 transition"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,14 +217,14 @@ export default function Navbar() {
                 <Link 
                   href="/dashboard/batches" 
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={handleMenuClose}
                 >
                   Gestionar Lotes
                 </Link>
                 <Link 
                   href="/dashboard/templates" 
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={handleMenuClose}
                 >
                   Plantillas de Lotes
                 </Link>
@@ -205,14 +238,14 @@ export default function Navbar() {
                 <Link 
                   href="/dashboard/passbook/fidelity" 
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={handleMenuClose}
                 >
                   Diseño Fidelidad
                 </Link>
                 <Link 
                   href="/dashboard/passbook/prepaid" 
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={handleMenuClose}
                 >
                   Diseño Prepago
                 </Link>
@@ -226,7 +259,7 @@ export default function Navbar() {
                 <Link 
                   href="/dashboard/customers" 
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={handleMenuClose}
                 >
                   Gestionar Clientes
                 </Link>
@@ -240,7 +273,7 @@ export default function Navbar() {
                 <Link 
                   href="/dashboard/validate" 
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={handleMenuClose}
                 >
                   Validar QR
                 </Link>
