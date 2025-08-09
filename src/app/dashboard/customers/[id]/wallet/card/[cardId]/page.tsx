@@ -191,15 +191,24 @@ export default function CardDetailPage() {
     if (!cardData) return;
     
     try {
-      const response = await fetch(`/api/customers/${customerId}/wallet/card/${cardId}/pkpass`);
+      const response = await fetch(`/api/customers/${customerId}/wallet/card/${cardId}/pkpass/download`);
       
       if (response.ok) {
-        const data = await response.json();
-        // Por ahora solo mostramos la estructura
-        alert("Estructura PKPass generada. Para implementación completa se requieren certificados de Apple.");
-        console.log("PKPass data:", data);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `shokupan-${cardData.code}.pkpass.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Mostrar información sobre el archivo
+        alert("Archivo PKPass descargado. Este es un preview de la estructura. Cuando tengas los certificados de Apple, se generará un archivo .pkpass válido que se puede añadir a Apple Wallet.");
       } else {
-        alert("Error al generar Apple Wallet");
+        const errorData = await response.json();
+        alert(`Error al generar Apple Wallet: ${errorData.error || 'Error desconocido'}`);
       }
     } catch (error) {
       console.error("Error generating Apple Wallet:", error);
