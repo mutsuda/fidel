@@ -196,7 +196,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Sistema de Lotes</h2>
-                <p className="text-gray-600 mt-1">Gestiona plantillas y lotes</p>
+                <p className="text-gray-600 mt-1">Gestiona plantillas y lotes de tarjetas físicas</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,7 +209,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h3 className="font-medium text-gray-900">Gestionar Lotes</h3>
-                  <p className="text-sm text-gray-600">Crea y gestiona lotes de tarjetas</p>
+                  <p className="text-sm text-gray-600">Crea y gestiona lotes de tarjetas físicas</p>
                 </div>
                 <Link 
                   href="/dashboard/batches"
@@ -221,14 +221,59 @@ export default function DashboardPage() {
               
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <h3 className="font-medium text-gray-900">Plantillas</h3>
-                  <p className="text-sm text-gray-600">Diseña plantillas para tarjetas</p>
+                  <h3 className="font-medium text-gray-900">Plantillas de Lotes</h3>
+                  <p className="text-sm text-gray-600">Diseña plantillas para tarjetas físicas</p>
                 </div>
                 <Link 
                   href="/dashboard/templates"
                   className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition text-sm"
                 >
                   Ver Plantillas
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Passbook Section */}
+        <div className="mt-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Diseños de Passbook</h2>
+                <p className="text-gray-600 mt-1">Personaliza el diseño de las tarjetas digitales para Apple Wallet</p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-lg">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <h3 className="font-medium text-gray-900">Diseños de Fidelidad</h3>
+                  <p className="text-sm text-gray-600">Tarjetas que se van sumando (ej: 10 cafés = 11º gratis)</p>
+                </div>
+                <Link 
+                  href="/dashboard/passbook/fidelity"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                >
+                  Diseñar
+                </Link>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <h3 className="font-medium text-gray-900">Diseños de Prepago</h3>
+                  <p className="text-sm text-gray-600">Tarjetas que se van restando (ej: 10 cafés regalados)</p>
+                </div>
+                <Link 
+                  href="/dashboard/passbook/prepaid"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                >
+                  Diseñar
                 </Link>
               </div>
             </div>

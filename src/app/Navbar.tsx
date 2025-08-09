@@ -8,6 +8,7 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showBatchesMenu, setShowBatchesMenu] = useState(false);
+  const [showPassbookMenu, setShowPassbookMenu] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
   // Cerrar menús cuando se hace click fuera
@@ -17,17 +18,18 @@ export default function Navbar() {
         setShowProfileMenu(false);
         setShowMobileMenu(false);
         setShowBatchesMenu(false);
+        setShowPassbookMenu(false);
       }
     };
 
-    if (showProfileMenu || showMobileMenu || showBatchesMenu) {
+    if (showProfileMenu || showMobileMenu || showBatchesMenu || showPassbookMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showProfileMenu, showMobileMenu, showBatchesMenu]);
+  }, [showProfileMenu, showMobileMenu, showBatchesMenu, showPassbookMenu]);
 
   // No mostrar navbar si no está autenticado
   if (status === "loading" || status === "unauthenticated") {
@@ -72,7 +74,39 @@ export default function Navbar() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
                     onClick={() => setShowBatchesMenu(false)}
                   >
-                    Plantillas
+                    Plantillas de Lotes
+                  </Link>
+                </div>
+              )}
+            </div>
+            
+            {/* Passbook Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowPassbookMenu(!showPassbookMenu)}
+                className="flex items-center gap-1 text-gray-700 hover:text-blue-700 font-medium transition text-sm"
+              >
+                Passbook
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {showPassbookMenu && (
+                <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <Link
+                    href="/dashboard/passbook/fidelity"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    onClick={() => setShowPassbookMenu(false)}
+                  >
+                    Diseño Fidelidad
+                  </Link>
+                  <Link
+                    href="/dashboard/passbook/prepaid"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    onClick={() => setShowPassbookMenu(false)}
+                  >
+                    Diseño Prepago
                   </Link>
                 </div>
               )}
@@ -159,7 +193,28 @@ export default function Navbar() {
                   className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
                   onClick={() => setShowMobileMenu(false)}
                 >
-                  Plantillas
+                  Plantillas de Lotes
+                </Link>
+              </div>
+              
+              {/* Passbook Section */}
+              <div className="space-y-2">
+                <div className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Passbook
+                </div>
+                <Link 
+                  href="/dashboard/passbook/fidelity" 
+                  className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  Diseño Fidelidad
+                </Link>
+                <Link 
+                  href="/dashboard/passbook/prepaid" 
+                  className="block text-gray-700 hover:text-blue-700 font-medium transition py-2 px-3 rounded-lg hover:bg-gray-50"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  Diseño Prepago
                 </Link>
               </div>
               
