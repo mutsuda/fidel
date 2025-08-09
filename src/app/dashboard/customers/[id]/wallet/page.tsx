@@ -76,6 +76,11 @@ export default function CustomerWalletPage() {
     totalUses: 10,
     initialUses: 10
   });
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<{
+    success?: boolean;
+    message?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!customerId) return;
@@ -360,6 +365,50 @@ export default function CustomerWalletPage() {
     }
   };
 
+  const sendCardEmail = async (cardId: string, includePassbook: boolean = false) => {
+    if (!walletData?.customer.email) {
+      alert("El cliente no tiene email registrado");
+      return;
+    }
+
+    setSendingEmail(true);
+    setEmailStatus(null);
+
+    try {
+      const response = await fetch(`/api/customers/${customerId}/cards/${cardId}/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          includePassbook
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmailStatus({
+          success: true,
+          message: `Email enviado correctamente a ${walletData.customer.email}`
+        });
+      } else {
+        setEmailStatus({
+          success: false,
+          message: data.error || 'Error al enviar el email'
+        });
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      setEmailStatus({
+        success: false,
+        message: 'Error al enviar el email'
+      });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const getCardTypeLabel = (type: string) => {
     return type === 'FIDELITY' ? 'Fidelidad' : 'Prepago';
   };
@@ -399,6 +448,51 @@ export default function CustomerWalletPage() {
           </div>
         </div>
       </div>
+
+      {/* Notificación de estado del email */}
+      {emailStatus && (
+        <div className={`mb-6 p-4 rounded-lg ${
+          emailStatus.success 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          <div className="flex">
+            <div className="flex-shrink-0">
+              {emailStatus.success ? (
+                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">
+                {emailStatus.message}
+              </p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  onClick={() => setEmailStatus(null)}
+                  className={`inline-flex rounded-md p-1.5 ${
+                    emailStatus.success 
+                      ? 'bg-green-50 text-green-500 hover:bg-green-100' 
+                      : 'bg-red-50 text-red-500 hover:bg-red-100'
+                  }`}
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-6 sm:space-y-8">
         {/* Información del cliente */}
@@ -583,12 +677,60 @@ export default function CustomerWalletPage() {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
-                      className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-blue-700 transition"
-                    >
-                      Ver Detalles
-                    </button>
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => window.location.href = `/dashboard/customers/${customerId}/wallet/card/${card.id}`}
+                        className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-blue-700 transition"
+                      >
+                        Ver Detalles
+                      </button>
+                      
+                      <button
+                        onClick={() => sendCardEmail(card.id, false)}
+                        disabled={sendingEmail}
+                        className="w-full sm:w-auto bg-green-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      >
+                        {sendingEmail ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Enviando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span>Enviar QR</span>
+                          </>
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={() => sendCardEmail(card.id, true)}
+                        disabled={sendingEmail}
+                        className="w-full sm:w-auto bg-purple-600 text-white px-4 py-3 sm:py-2 rounded text-sm hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      >
+                        {sendingEmail ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Enviando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <span>Enviar Passbook</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
