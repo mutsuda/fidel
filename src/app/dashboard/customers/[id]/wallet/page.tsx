@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import QRCode from "qrcode";
 import { QRCodeSVG } from "qrcode.react";
+import Link from "next/link";
 
 interface WalletData {
   customer: {
@@ -405,12 +406,23 @@ export default function CustomerWalletPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <h2 className="text-lg sm:text-xl font-semibold">Información del Cliente</h2>
             {!editingCustomer && (
-              <button
-                onClick={startEditingCustomer}
-                className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:px-3 sm:py-1 rounded text-sm hover:bg-blue-700"
-              >
-                Editar Cliente
-              </button>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+                <Link
+                  href={`/dashboard/customers/${customerId}/history`}
+                  className="w-full sm:w-auto bg-green-600 text-white px-4 py-3 sm:px-3 sm:py-1 rounded text-sm hover:bg-green-700 transition flex items-center justify-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span>Ver Historial</span>
+                </Link>
+                <button
+                  onClick={startEditingCustomer}
+                  className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:px-3 sm:py-1 rounded text-sm hover:bg-blue-700"
+                >
+                  Editar Cliente
+                </button>
+              </div>
             )}
           </div>
           

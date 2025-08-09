@@ -9,6 +9,17 @@ interface Customer {
   phone?: string;
   createdAt: string;
   cards: Card[];
+  lastValidation?: {
+    id: string;
+    scannedAt: string;
+    ipAddress?: string;
+    userAgent?: string;
+  };
+  lastValidationCard?: {
+    id: string;
+    code: string;
+    type: 'FIDELITY' | 'PREPAID';
+  };
 }
 
 interface Card {
@@ -300,6 +311,28 @@ export default function CustomersPage() {
                     <p className="text-gray-400 text-xs sm:text-sm">
                       Registrado el {new Date(customer.createdAt).toLocaleDateString()}
                     </p>
+                    {/* Información de la última validación */}
+                    {customer.lastValidation && (
+                      <div className="mt-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-xs text-gray-600">
+                            Última validación: {new Date(customer.lastValidation.scannedAt).toLocaleString('es-ES', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        {customer.lastValidationCard && (
+                          <span className="text-xs text-gray-500 ml-4">
+                            Tarjeta: {customer.lastValidationCard.code} ({customer.lastValidationCard.type === 'FIDELITY' ? 'Fidelidad' : 'Prepago'})
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">

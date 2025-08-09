@@ -16,13 +16,46 @@ export async function GET(request: NextRequest) {
       where: { userId: session.user.id },
       include: {
         cards: {
+          include: {
+            scans: {
+              orderBy: { scannedAt: 'desc' },
+              take: 1 // Solo la última validación
+            }
+          },
           orderBy: { createdAt: 'desc' }
         }
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json(customers);
+    // Procesar los datos para incluir información de la última validación
+    const customersWithLastValidation = customers.map((customer: any) => {
+      // Encontrar la última validación entre todas las tarjetas del cliente
+      let lastValidation: any = null;
+      let lastValidationCard: any = null;
+
+      customer.cards.forEach((card: any) => {
+        if (card.scans && card.scans.length > 0) {
+          const cardLastScan = card.scans[0]; // Ya está ordenado por scannedAt desc
+          if (!lastValidation || cardLastScan.scannedAt > lastValidation.scannedAt) {
+            lastValidation = cardLastScan;
+            lastValidationCard = card;
+          }
+        }
+      });
+
+      return {
+        ...customer,
+        lastValidation,
+        lastValidationCard: lastValidationCard ? {
+          id: lastValidationCard.id,
+          code: lastValidationCard.code,
+          type: lastValidationCard.type
+        } : null
+      };
+    });
+
+    return NextResponse.json(customersWithLastValidation);
   } catch (error) {
     console.error("Error fetching customers:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
