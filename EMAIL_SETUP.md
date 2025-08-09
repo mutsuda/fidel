@@ -7,16 +7,54 @@ Para que el sistema de envío de emails funcione correctamente, necesitas config
 ### Variables Básicas
 
 ```bash
-# Configuración SMTP
-SMTP_HOST="smtp.gmail.com"          # Servidor SMTP
-SMTP_PORT="587"                     # Puerto SMTP (587 para TLS, 465 para SSL)
-SMTP_USER="tu-email@gmail.com"      # Usuario/email
-SMTP_PASS="tu-contraseña"           # Contraseña o contraseña de aplicación
+# Configuración Resend (Recomendado - GRATUITO)
+RESEND_API_KEY="re_xxxxxxxxxxxxx"    # API Key de Resend
+
+# Configuración SMTP (Alternativa)
+SMTP_HOST="smtp.resend.com"          # Servidor SMTP
+SMTP_PORT="587"                      # Puerto SMTP (587 para TLS, 465 para SSL)
+SMTP_USER="resend"                   # Usuario/email
+SMTP_PASS="tu-api-key"               # Contraseña o API key
 ```
 
 ## Configuraciones Recomendadas
 
-### 1. Gmail (Recomendado para desarrollo)
+### 1. Resend (Recomendado - GRATUITO)
+
+**Resend** es un servicio de email moderno y confiable que ofrece:
+- ✅ **Plan gratuito** - 3,000 emails/mes gratis
+- ✅ **Configuración sencilla** - Solo necesitas una API key
+- ✅ **Excelente deliverability** - Emails llegan a la bandeja de entrada
+- ✅ **API moderna** - Fácil de usar y mantener
+- ✅ **Soporte técnico** - Documentación excelente
+
+```bash
+RESEND_API_KEY="re_xxxxxxxxxxxxx"
+```
+
+**Pasos para configurar Resend:**
+
+1. **Crear cuenta en Resend:**
+   - Ve a [resend.com](https://resend.com)
+   - Crea una cuenta gratuita
+   - Verifica tu email
+
+2. **Obtener API Key:**
+   - Ve a la sección "API Keys"
+   - Crea una nueva API key
+   - Copia la key (empieza con `re_`)
+
+3. **Configurar dominio (opcional):**
+   - Ve a "Domains"
+   - Añade tu dominio `shokupan.es`
+   - Sigue las instrucciones de DNS
+
+4. **Configurar variables de entorno:**
+   ```bash
+   RESEND_API_KEY="re_xxxxxxxxxxxxx"
+   ```
+
+### 2. Gmail (Alternativa para desarrollo)
 
 ```bash
 SMTP_HOST="smtp.gmail.com"
@@ -27,16 +65,7 @@ SMTP_PASS="tu-contraseña-de-aplicación"
 
 **Nota:** Para Gmail, necesitas usar una "Contraseña de aplicación" en lugar de tu contraseña normal.
 
-### 2. Tu Dominio shokupan.es
-
-```bash
-SMTP_HOST="mail.shokupan.es"
-SMTP_PORT="587"
-SMTP_USER="noreply@shokupan.es"
-SMTP_PASS="tu-contraseña-de-email"
-```
-
-### 3. SendGrid (Recomendado para producción)
+### 3. SendGrid (Alternativa para producción)
 
 ```bash
 SMTP_HOST="smtp.sendgrid.net"
@@ -46,6 +75,40 @@ SMTP_PASS="tu-api-key-de-sendgrid"
 ```
 
 ## Configuración por Proveedor
+
+### Resend (Recomendado)
+
+**Ventajas de Resend:**
+- 🆓 **Gratuito** - 3,000 emails/mes sin costo
+- 🚀 **Rápido** - API moderna y eficiente
+- 📊 **Analytics** - Tracking de emails enviados
+- 🎯 **Deliverability** - Excelente tasa de entrega
+- 🔧 **Fácil** - Configuración en 2 minutos
+
+**Configuración paso a paso:**
+
+1. **Registro:**
+   - Ve a [resend.com](https://resend.com)
+   - Crea una cuenta gratuita
+   - Verifica tu email
+
+2. **API Key:**
+   - Dashboard > API Keys > Create API Key
+   - Copia la key (formato: `re_xxxxxxxxxxxxx`)
+
+3. **Dominio (opcional):**
+   - Dashboard > Domains > Add Domain
+   - Añade `shokupan.es`
+   - Configura los registros DNS
+
+4. **Variables de entorno:**
+   ```bash
+   RESEND_API_KEY="re_xxxxxxxxxxxxx"
+   ```
+
+5. **Prueba:**
+   - Usa el endpoint `/api/email/test` para verificar
+   - Envía un email de prueba
 
 ### Gmail
 
@@ -61,12 +124,6 @@ SMTP_PASS="tu-api-key-de-sendgrid"
 1. Crea una cuenta en SendGrid
 2. Genera una API Key
 3. Usa la API Key como contraseña
-
-### Dominio Propio (shokupan.es)
-
-1. Configura el servidor de correo en tu hosting
-2. Usa las credenciales proporcionadas por tu proveedor
-3. Asegúrate de que el puerto 587 esté abierto
 
 ## Verificación de Configuración
 
@@ -99,35 +156,49 @@ Las plantillas se pueden personalizar editando los archivos:
 
 ## Troubleshooting
 
-### Error: "Invalid login"
+### Error: "Invalid API key"
 
-- Verifica que las credenciales sean correctas
-- Para Gmail, asegúrate de usar una contraseña de aplicación
-- Verifica que la verificación en dos pasos esté activada
+- Verifica que la API key de Resend sea correcta
+- Asegúrate de que la key empiece con `re_`
+- Verifica que la cuenta esté activa
 
-### Error: "Connection timeout"
+### Error: "Domain not verified"
 
-- Verifica que el puerto esté abierto
-- Asegúrate de que el servidor SMTP sea correcto
-- Revisa la configuración de firewall
+- Configura tu dominio en Resend
+- Verifica los registros DNS
+- Usa un dominio verificado o el dominio por defecto
 
-### Error: "Authentication failed"
+### Error: "Rate limit exceeded"
 
-- Verifica que el usuario y contraseña sean correctos
-- Para Gmail, usa contraseña de aplicación
-- Asegúrate de que la cuenta tenga permisos de SMTP
+- El plan gratuito tiene límites
+- Considera actualizar a un plan de pago
+- Revisa el uso en el dashboard de Resend
 
 ## Seguridad
 
-- Nunca commits las credenciales reales
+- Nunca commits las API keys reales
 - Usa variables de entorno
-- Considera usar servicios como SendGrid para producción
+- Considera usar servicios como Resend para producción
 - Implementa rate limiting para evitar spam
 
 ## Próximos Pasos
 
-1. Configura las variables de entorno
-2. Prueba el envío de emails
-3. Personaliza las plantillas según tus necesidades
-4. Implementa rate limiting y monitoreo
-5. Configura logs para debugging 
+1. **Configura Resend:**
+   - Crea cuenta en [resend.com](https://resend.com)
+   - Obtén tu API key
+   - Configura las variables de entorno
+
+2. **Prueba el sistema:**
+   - Usa el endpoint `/api/email/test`
+   - Envía un email de prueba
+   - Verifica la configuración
+
+3. **Personaliza:**
+   - Ajusta las plantillas según tus necesidades
+   - Configura tu dominio personalizado
+   - Implementa analytics
+
+4. **Monitoreo:**
+   - Revisa los logs de envío
+   - Configura alertas
+   - Monitorea la deliverability 

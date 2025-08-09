@@ -1,25 +1,85 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Configuración del transportador de email
+// Inicializar Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Configuración del transportador de email (fallback para nodemailer)
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  host: process.env.SMTP_HOST || 'smtp.resend.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // true para 465, false para otros puertos
+  secure: false,
   auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
+    user: process.env.SMTP_USER || 'resend',
+    pass: process.env.SMTP_PASS || process.env.RESEND_API_KEY || '',
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 // Verificar la configuración del transportador
 export const verifyEmailConfig = async () => {
   try {
+    // Intentar con Resend primero
+    if (process.env.RESEND_API_KEY) {
+      try {
+        // Verificar la API key intentando enviar un email de prueba
+        const { data, error } = await resend.emails.send({
+          from: 'Shokupan <noreply@shokupan.es>',
+          to: ['test@example.com'],
+          subject: 'Test',
+          html: '<p>Test</p>'
+        });
+        
+        if (!error) {
+          console.log('Resend configuration verified successfully');
+          return true;
+        }
+      } catch (resendError) {
+        console.log('Resend not available, falling back to SMTP');
+      }
+    }
+    
+    // Fallback a nodemailer
     await transporter.verify();
     console.log('Email configuration verified successfully');
     return true;
   } catch (error) {
     console.error('Email configuration error:', error);
     return false;
+  }
+};
+
+// Función específica para probar configuración de Resend
+export const testResendEmailConfig = async () => {
+  try {
+    if (!process.env.RESEND_API_KEY) {
+      return { success: false, error: 'RESEND_API_KEY no está configurado' };
+    }
+
+    // Enviar email de prueba con Resend
+    const { data, error } = await resend.emails.send({
+      from: 'Shokupan <noreply@shokupan.es>',
+      to: ['test@example.com'], // Email de prueba
+      subject: 'Prueba de configuración - Shokupan',
+      html: `
+        <h2>✅ Configuración de email exitosa</h2>
+        <p>La configuración de email con Resend está funcionando correctamente.</p>
+        <p><strong>Servicio:</strong> Resend</p>
+        <p><strong>API Key:</strong> Configurado</p>
+        <p><em>Este es un email de prueba automático.</em></p>
+      `
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id, message: 'Email de prueba enviado correctamente' };
+  } catch (error) {
+    console.error('Error testing Resend email config:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 };
 
@@ -35,9 +95,33 @@ interface EmailData {
   }>;
 }
 
-// Función para enviar emails
+// Función para enviar emails (usando Resend como prioridad)
 export const sendEmail = async (emailData: EmailData) => {
   try {
+    // Intentar con Resend primero
+    if (process.env.RESEND_API_KEY) {
+      const { data, error } = await resend.emails.send({
+        from: 'Shokupan <noreply@shokupan.es>',
+        to: [emailData.to],
+        subject: emailData.subject,
+        html: emailData.html,
+        attachments: emailData.attachments?.map(attachment => ({
+          filename: attachment.filename,
+          content: typeof attachment.content === 'string' 
+            ? Buffer.from(attachment.content) 
+            : attachment.content
+        })) || []
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      console.log('Email sent successfully via Resend:', data?.id);
+      return { success: true, messageId: data?.id };
+    }
+
+    // Fallback a nodemailer
     const mailOptions = {
       from: `"Shokupan" <${process.env.SMTP_USER || 'noreply@shokupan.es'}>`,
       to: emailData.to,
@@ -47,7 +131,7 @@ export const sendEmail = async (emailData: EmailData) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
+    console.log('Email sent successfully via SMTP:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('Error sending email:', error);
