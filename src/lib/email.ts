@@ -32,7 +32,7 @@ export const verifyEmailConfig = async () => {
       try {
         // Verificar la API key intentando enviar un email de prueba
         const { data, error } = await resend.emails.send({
-          from: 'Shokupan <onboarding@resend.dev>',
+          from: 'Shokupan <noreply@mail.shokupan.es>',
           to: ['test@example.com'],
           subject: 'Test',
           html: '<p>Test</p>'
@@ -67,13 +67,14 @@ export const testResendEmailConfig = async () => {
 
     // Enviar email de prueba con Resend
     const { data, error } = await resend.emails.send({
-      from: 'Shokupan <onboarding@resend.dev>', // Usar dominio por defecto hasta verificar shokupan.es
+      from: 'Shokupan <noreply@mail.shokupan.es>', // Usar dominio personalizado
       to: ['test@example.com'], // Email de prueba
       subject: 'Prueba de configuración - Shokupan',
       html: `
         <h2>✅ Configuración de email exitosa</h2>
         <p>La configuración de email con Resend está funcionando correctamente.</p>
         <p><strong>Servicio:</strong> Resend</p>
+        <p><strong>Dominio:</strong> mail.shokupan.es</p>
         <p><strong>API Key:</strong> Configurado</p>
         <p><em>Este es un email de prueba automático.</em></p>
       `
@@ -109,7 +110,7 @@ export const sendEmail = async (emailData: EmailData) => {
     const resend = getResend();
     if (resend && process.env.RESEND_API_KEY) {
       const { data, error } = await resend.emails.send({
-        from: 'Shokupan <onboarding@resend.dev>', // Usar dominio por defecto hasta verificar shokupan.es
+        from: 'Shokupan <noreply@mail.shokupan.es>', // Usar dominio personalizado
         to: [emailData.to],
         subject: emailData.subject,
         html: emailData.html,
@@ -131,7 +132,7 @@ export const sendEmail = async (emailData: EmailData) => {
 
     // Fallback a nodemailer
     const mailOptions = {
-      from: `"Shokupan" <${process.env.SMTP_USER || 'noreply@shokupan.es'}>`,
+      from: `"Shokupan" <${process.env.SMTP_USER || 'noreply@mail.shokupan.es'}>`,
       to: emailData.to,
       subject: emailData.subject,
       html: emailData.html,
@@ -265,7 +266,7 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
         
         <div class="footer">
           <p>© 2024 Shokupan. Todos los derechos reservados.</p>
-          <p>Este email fue enviado desde <strong>noreply@shokupan.es</strong></p>
+          <p>Este email fue enviado desde <strong>noreply@mail.shokupan.es</strong></p>
         </div>
       </div>
     </body>
@@ -379,7 +380,7 @@ export const generatePassbookEmailTemplate = (customerName: string, cardCode: st
         
         <div class="footer">
           <p>© 2024 Shokupan. Todos los derechos reservados.</p>
-          <p>Este email fue enviado desde <strong>noreply@shokupan.es</strong></p>
+          <p>Este email fue enviado desde <strong>noreply@mail.shokupan.es</strong></p>
         </div>
       </div>
     </body>
