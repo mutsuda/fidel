@@ -1,9 +1,6 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
-// Inicializar Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Configuración del transportador de email (fallback para nodemailer)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.resend.com',
@@ -18,15 +15,24 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Función para obtener instancia de Resend
+const getResend = () => {
+  if (!process.env.RESEND_API_KEY) {
+    return null;
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+};
+
 // Verificar la configuración del transportador
 export const verifyEmailConfig = async () => {
   try {
     // Intentar con Resend primero
-    if (process.env.RESEND_API_KEY) {
+    const resend = getResend();
+    if (resend && process.env.RESEND_API_KEY) {
       try {
         // Verificar la API key intentando enviar un email de prueba
         const { data, error } = await resend.emails.send({
-          from: 'Shokupan <noreply@shokupan.es>',
+          from: 'Shokupan <onboarding@resend.dev>',
           to: ['test@example.com'],
           subject: 'Test',
           html: '<p>Test</p>'
@@ -54,7 +60,8 @@ export const verifyEmailConfig = async () => {
 // Función específica para probar configuración de Resend
 export const testResendEmailConfig = async () => {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResend();
+    if (!resend || !process.env.RESEND_API_KEY) {
       return { success: false, error: 'RESEND_API_KEY no está configurado' };
     }
 
@@ -99,7 +106,8 @@ interface EmailData {
 export const sendEmail = async (emailData: EmailData) => {
   try {
     // Intentar con Resend primero
-    if (process.env.RESEND_API_KEY) {
+    const resend = getResend();
+    if (resend && process.env.RESEND_API_KEY) {
       const { data, error } = await resend.emails.send({
         from: 'Shokupan <onboarding@resend.dev>', // Usar dominio por defecto hasta verificar shokupan.es
         to: [emailData.to],
