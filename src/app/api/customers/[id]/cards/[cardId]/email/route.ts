@@ -64,10 +64,11 @@ export async function POST(request: NextRequest) {
 
     if (includePassbook) {
       // Email con Passbook adjunto
-      emailHtml = generatePassbookEmailTemplate(
+      emailHtml = await generatePassbookEmailTemplate(
         card.customer.name,
         card.code,
-        card.type
+        card.type,
+        session.user.id
       );
       subject = `Tu Passbook - Tarjeta ${card.code} - Shokupan`;
 
@@ -76,11 +77,12 @@ export async function POST(request: NextRequest) {
       // En el futuro, aquí se generaría el archivo .pkpass y se adjuntaría
     } else {
       // Email con QR code
-      emailHtml = generateCardEmailTemplate(
+      emailHtml = await generateCardEmailTemplate(
         card.customer.name,
         card.code,
         card.type,
-        qrCodeDataUrl || undefined
+        qrCodeDataUrl || undefined,
+        session.user.id
       );
       subject = `Tu tarjeta ${card.code} - Shokupan`;
     }

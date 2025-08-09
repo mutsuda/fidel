@@ -27,6 +27,43 @@ model User {
   
   // Configuraciones de Passbook por usuario
   passbookConfigs PassbookConfig[]
+  
+  // Perfil de negocio
+  businessProfile BusinessProfile?
+}
+
+model BusinessProfile {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @unique
+  
+  // Información básica del negocio
+  businessName        String?
+  businessDescription String?
+  businessLogo        String?  // URL del logo
+  businessWebsite     String?
+  businessPhone       String?
+  businessAddress     String?
+  
+  // Configuración de branding
+  primaryColor        String   @default("#1976D2")
+  secondaryColor      String   @default("#E3F2FD")
+  accentColor         String   @default("#1565C0")
+  
+  // Configuración de email
+  emailSignature      String?
+  emailFooter         String?
+  
+  // Configuración de notificaciones
+  emailNotifications  Boolean  @default(true)
+  smsNotifications    Boolean  @default(false)
+  
+  // Configuración de privacidad
+  showBusinessInfo    Boolean  @default(true)
+  allowPublicProfile  Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Template {

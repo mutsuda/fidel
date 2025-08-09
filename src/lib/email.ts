@@ -143,9 +143,39 @@ export const sendEmail = async (emailData: EmailData) => {
   }
 };
 
+// Función para obtener el perfil de negocio
+const getBusinessProfile = async (userId: string) => {
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    const businessProfile = await prisma.businessProfile.findUnique({
+      where: { userId }
+    });
+    
+    await prisma.$disconnect();
+    return businessProfile;
+  } catch (error) {
+    console.error('Error fetching business profile:', error);
+    return null;
+  }
+};
+
 // Plantilla para email de tarjeta
-export const generateCardEmailTemplate = (customerName: string, cardCode: string, cardType: string, qrCodeDataUrl?: string) => {
+export const generateCardEmailTemplate = async (customerName: string, cardCode: string, cardType: string, qrCodeDataUrl?: string, userId?: string) => {
   const cardTypeLabel = cardType === 'FIDELITY' ? 'Fidelidad' : 'Prepago';
+  
+  // Obtener perfil de negocio si se proporciona userId
+  let businessProfile = null;
+  if (userId) {
+    businessProfile = await getBusinessProfile(userId);
+  }
+  
+  const businessName = businessProfile?.businessName || 'Shokupan';
+  const businessLogo = businessProfile?.businessLogo || '';
+  const primaryColor = businessProfile?.primaryColor || '#1976D2';
+  const emailSignature = businessProfile?.emailSignature || '';
+  const emailFooter = businessProfile?.emailFooter || '© 2024 Shokupan. Todos los derechos reservados.';
   
   return `
     <!DOCTYPE html>
@@ -153,7 +183,7 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Tu tarjeta de ${cardTypeLabel} - Shokupan</title>
+      <title>Tu tarjeta de ${cardTypeLabel} - ${businessName}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -177,11 +207,11 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
         .logo {
           font-size: 24px;
           font-weight: bold;
-          color: #1976d2;
+          color: ${primaryColor};
           margin-bottom: 10px;
         }
         .title {
-          color: #1976d2;
+          color: ${primaryColor};
           font-size: 24px;
           margin-bottom: 20px;
         }
@@ -190,7 +220,7 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
           border-radius: 8px;
           padding: 20px;
           margin: 20px 0;
-          border-left: 4px solid #1976d2;
+          border-left: 4px solid ${primaryColor};
         }
         .qr-code {
           text-align: center;
@@ -212,7 +242,7 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
         }
         .button {
           display: inline-block;
-          background-color: #1976d2;
+          background-color: ${primaryColor};
           color: white;
           padding: 12px 24px;
           text-decoration: none;
@@ -220,14 +250,15 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
           margin: 10px 0;
         }
         .button:hover {
-          background-color: #1565c0;
+          background-color: ${primaryColor};
+          opacity: 0.9;
         }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">☕ Shokupan</div>
+          ${businessLogo ? `<img src="${businessLogo}" alt="${businessName}" style="max-height: 50px; margin-bottom: 10px;">` : `<div class="logo">☕ ${businessName}</div>`}
           <h1 class="title">¡Tu tarjeta de ${cardTypeLabel} está lista!</h1>
         </div>
         
@@ -259,8 +290,10 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
           </ul>
         </div>
         
+        ${emailSignature ? `<div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid ${primaryColor};">${emailSignature}</div>` : ''}
+        
         <div class="footer">
-          <p>© 2024 Shokupan. Todos los derechos reservados.</p>
+          <p>${emailFooter}</p>
           <p>Este email fue enviado desde <strong>noreply@mail.shokupan.es</strong></p>
         </div>
       </div>
@@ -270,8 +303,20 @@ export const generateCardEmailTemplate = (customerName: string, cardCode: string
 };
 
 // Plantilla para email con Passbook adjunto
-export const generatePassbookEmailTemplate = (customerName: string, cardCode: string, cardType: string) => {
+export const generatePassbookEmailTemplate = async (customerName: string, cardCode: string, cardType: string, userId?: string) => {
   const cardTypeLabel = cardType === 'FIDELITY' ? 'Fidelidad' : 'Prepago';
+  
+  // Obtener perfil de negocio si se proporciona userId
+  let businessProfile = null;
+  if (userId) {
+    businessProfile = await getBusinessProfile(userId);
+  }
+  
+  const businessName = businessProfile?.businessName || 'Shokupan';
+  const businessLogo = businessProfile?.businessLogo || '';
+  const primaryColor = businessProfile?.primaryColor || '#1976D2';
+  const emailSignature = businessProfile?.emailSignature || '';
+  const emailFooter = businessProfile?.emailFooter || '© 2024 Shokupan. Todos los derechos reservados.';
   
   return `
     <!DOCTYPE html>
@@ -279,7 +324,7 @@ export const generatePassbookEmailTemplate = (customerName: string, cardCode: st
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Tu Passbook - Shokupan</title>
+      <title>Tu Passbook - ${businessName}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -303,11 +348,11 @@ export const generatePassbookEmailTemplate = (customerName: string, cardCode: st
         .logo {
           font-size: 24px;
           font-weight: bold;
-          color: #1976d2;
+          color: ${primaryColor};
           margin-bottom: 10px;
         }
         .title {
-          color: #1976d2;
+          color: ${primaryColor};
           font-size: 24px;
           margin-bottom: 20px;
         }
@@ -316,7 +361,7 @@ export const generatePassbookEmailTemplate = (customerName: string, cardCode: st
           border-radius: 8px;
           padding: 20px;
           margin: 20px 0;
-          border-left: 4px solid #1976d2;
+          border-left: 4px solid ${primaryColor};
         }
         .passbook-info {
           background-color: #e8f5e8;
@@ -338,7 +383,7 @@ export const generatePassbookEmailTemplate = (customerName: string, cardCode: st
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">☕ Shokupan</div>
+          ${businessLogo ? `<img src="${businessLogo}" alt="${businessName}" style="max-height: 50px; margin-bottom: 10px;">` : `<div class="logo">☕ ${businessName}</div>`}
           <h1 class="title">¡Tu Passbook está listo!</h1>
         </div>
         
@@ -373,8 +418,10 @@ export const generatePassbookEmailTemplate = (customerName: string, cardCode: st
           </ul>
         </div>
         
+        ${emailSignature ? `<div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid ${primaryColor};">${emailSignature}</div>` : ''}
+        
         <div class="footer">
-          <p>© 2024 Shokupan. Todos los derechos reservados.</p>
+          <p>${emailFooter}</p>
           <p>Este email fue enviado desde <strong>noreply@mail.shokupan.es</strong></p>
         </div>
       </div>
