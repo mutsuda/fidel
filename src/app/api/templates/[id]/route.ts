@@ -17,15 +17,7 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     
     const template = await prisma.template.findFirst({ 
-      where: { id, userId },
-      include: {
-        passbookConfig: {
-          include: {
-            fidelityConfig: true,
-            prepaidConfig: true
-          }
-        }
-      }
+      where: { id, userId }
     });
     
     if (!template) {

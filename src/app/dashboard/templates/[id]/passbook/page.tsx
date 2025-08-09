@@ -83,21 +83,8 @@ export default function PassbookDesignPage() {
         const data = await response.json();
         setTemplate(data);
         
-        // Cargar configuración existente si existe
-        if (data.passbookConfig) {
-          setConfig({
-            ...config,
-            ...data.passbookConfig,
-            fidelityConfig: {
-              ...config.fidelityConfig,
-              ...data.passbookConfig.fidelityConfig
-            },
-            prepaidConfig: {
-              ...config.prepaidConfig,
-              ...data.passbookConfig.prepaidConfig
-            }
-          });
-        }
+        // Por ahora, usar configuración por defecto
+        // En el futuro, esto se cargaría desde la configuración global de Passbook
       }
     } catch (error) {
       console.error("Error fetching template:", error);

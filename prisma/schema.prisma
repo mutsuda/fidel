@@ -38,9 +38,6 @@ model Template {
   userId      String
   createdAt   DateTime @default(now())
   batches     Batch[]
-  
-  // Configuraciones de Passbook
-  passbookConfig PassbookConfig?
 }
 
 model PassbookConfig {

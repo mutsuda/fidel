@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
     }
 
-    // Por ahora, devolvemos la plantilla sin configuración de Passbook
     return NextResponse.json(template);
   } catch (error) {
     console.error("Error fetching template passbook config:", error);
@@ -69,21 +68,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
     }
 
-    // Por ahora, solo guardamos la configuración en memoria o en un archivo temporal
-    // En una implementación real, esto se guardaría en la base de datos
-    const passbookConfig = {
-      businessName,
-      businessLogo,
-      backgroundColor,
-      foregroundColor,
-      labelColor,
-      fidelityConfig,
-      prepaidConfig
-    };
-
+    // Por ahora, solo devolvemos éxito
+    // En el futuro, esto se guardaría en la configuración global de Passbook
     return NextResponse.json({
       success: true,
-      passbookConfig,
       message: "Configuración de Passbook guardada correctamente (modo temporal)"
     });
 
