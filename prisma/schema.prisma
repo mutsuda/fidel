@@ -35,6 +35,65 @@ model Template {
   userId      String
   createdAt   DateTime @default(now())
   batches     Batch[]
+  
+  // Configuraciones de Passbook
+  passbookConfig PassbookConfig?
+}
+
+model PassbookConfig {
+  id          String   @id @default(cuid())
+  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  templateId  String   @unique
+  
+  // Configuración general
+  businessName        String?
+  businessLogo        String?  // URL del logo
+  
+  // Colores personalizados
+  backgroundColor     String   @default("rgb(227, 242, 253)")  // Azul por defecto para fidelidad
+  foregroundColor     String   @default("rgb(0, 0, 0)")
+  labelColor          String   @default("rgb(25, 118, 210)")
+  
+  // Configuración específica por tipo de tarjeta
+  fidelityConfig      FidelityPassbookConfig?
+  prepaidConfig       PrepaidPassbookConfig?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FidelityPassbookConfig {
+  id                String         @id @default(cuid())
+  passbookConfig    PassbookConfig @relation(fields: [passbookConfigId], references: [id], onDelete: Cascade)
+  passbookConfigId  String         @unique
+  
+  // Colores específicos para fidelidad
+  backgroundColor   String         @default("rgb(227, 242, 253)")  // Azul suave
+  labelColor        String         @default("rgb(25, 118, 210)")   // Azul
+  
+  // Configuración de progreso
+  totalUses         Int            @default(11)
+  progressText      String         @default("Progreso")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PrepaidPassbookConfig {
+  id                String         @id @default(cuid())
+  passbookConfig    PassbookConfig @relation(fields: [passbookConfigId], references: [id], onDelete: Cascade)
+  passbookConfigId  String         @unique
+  
+  // Colores específicos para prepago
+  backgroundColor   String         @default("rgb(232, 245, 232)")  // Verde suave
+  labelColor        String         @default("rgb(46, 125, 50)")    // Verde
+  
+  // Configuración de usos
+  initialUses       Int            @default(10)
+  remainingText     String         @default("Restantes")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Batch {
