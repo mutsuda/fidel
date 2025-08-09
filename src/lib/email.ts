@@ -60,7 +60,7 @@ export const testResendEmailConfig = async () => {
 
     // Enviar email de prueba con Resend
     const { data, error } = await resend.emails.send({
-      from: 'Shokupan <noreply@shokupan.es>',
+      from: 'Shokupan <onboarding@resend.dev>', // Usar dominio por defecto hasta verificar shokupan.es
       to: ['test@example.com'], // Email de prueba
       subject: 'Prueba de configuración - Shokupan',
       html: `
@@ -101,7 +101,7 @@ export const sendEmail = async (emailData: EmailData) => {
     // Intentar con Resend primero
     if (process.env.RESEND_API_KEY) {
       const { data, error } = await resend.emails.send({
-        from: 'Shokupan <noreply@shokupan.es>',
+        from: 'Shokupan <onboarding@resend.dev>', // Usar dominio por defecto hasta verificar shokupan.es
         to: [emailData.to],
         subject: emailData.subject,
         html: emailData.html,
