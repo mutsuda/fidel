@@ -18,8 +18,10 @@ const transporter = nodemailer.createTransport({
 // Función para obtener instancia de Resend
 const getResend = () => {
   if (!process.env.RESEND_API_KEY) {
+    console.log('RESEND_API_KEY no encontrada en variables de entorno');
     return null;
   }
+  console.log('RESEND_API_KEY encontrada, inicializando Resend');
   return new Resend(process.env.RESEND_API_KEY);
 };
 
@@ -41,16 +43,19 @@ export const verifyEmailConfig = async () => {
         if (!error) {
           console.log('Resend configuration verified successfully');
           return true;
+        } else {
+          console.log('Resend error:', error);
+          return false;
         }
       } catch (resendError) {
-        console.log('Resend not available, falling back to SMTP');
+        console.log('Resend not available:', resendError instanceof Error ? resendError.message : 'Unknown error');
+        return false;
       }
     }
     
-    // Fallback a nodemailer
-    await transporter.verify();
-    console.log('Email configuration verified successfully');
-    return true;
+    // Si no hay Resend configurado, no intentar SMTP
+    console.log('Resend not configured, skipping SMTP fallback');
+    return false;
   } catch (error) {
     console.error('Email configuration error:', error);
     return false;
@@ -103,7 +108,7 @@ interface EmailData {
   }>;
 }
 
-// Función para enviar emails (usando Resend como prioridad)
+// Función para enviar emails (usando solo Resend)
 export const sendEmail = async (emailData: EmailData) => {
   try {
     // Intentar con Resend primero
@@ -130,18 +135,8 @@ export const sendEmail = async (emailData: EmailData) => {
       return { success: true, messageId: data?.id };
     }
 
-    // Fallback a nodemailer
-    const mailOptions = {
-      from: `"Shokupan" <${process.env.SMTP_USER || 'noreply@mail.shokupan.es'}>`,
-      to: emailData.to,
-      subject: emailData.subject,
-      html: emailData.html,
-      attachments: emailData.attachments || [],
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully via SMTP:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    // Si no hay Resend configurado, devolver error
+    throw new Error('RESEND_API_KEY no está configurado. No se puede enviar email.');
   } catch (error) {
     console.error('Error sending email:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
