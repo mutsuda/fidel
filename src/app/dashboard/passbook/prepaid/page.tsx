@@ -71,6 +71,7 @@ export default function PrepaidPassbookDesignPage() {
       
       if (response.ok) {
         alert("Configuración guardada correctamente");
+        fetchConfig(); // Recargar configuración
       } else {
         const error = await response.json();
         alert(`Error: ${error.error || 'No se pudo guardar la configuración'}`);

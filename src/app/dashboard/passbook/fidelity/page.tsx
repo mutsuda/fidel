@@ -27,7 +27,7 @@ export default function FidelityPassbookDesignPage() {
     backgroundColor: "#E3F2FD",
     foregroundColor: "#000000",
     labelColor: "#1976D2",
-    totalUses: 11,
+    totalUses: 10,
     progressText: "Progreso"
   });
 
@@ -71,6 +71,7 @@ export default function FidelityPassbookDesignPage() {
       
       if (response.ok) {
         alert("Configuración guardada correctamente");
+        fetchConfig(); // Recargar configuración
       } else {
         const error = await response.json();
         alert(`Error: ${error.error || 'No se pudo guardar la configuración'}`);

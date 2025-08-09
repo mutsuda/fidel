@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import authOptions from "@/lib/authOptions";
 
-const prisma = new PrismaClient();
+// Almacenamiento temporal en memoria (en producción usar base de datos)
+const tempStorage = new Map();
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -12,15 +12,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Por ahora, devolvemos una configuración por defecto
-    // En una implementación real, esto se cargaría desde la base de datos
+    const key = `fidelity_${session.user.id}`;
+    const existingConfig = tempStorage.get(key);
+
+    if (existingConfig) {
+      return NextResponse.json({ config: existingConfig });
+    }
+
+    // Configuración por defecto si no existe
     const defaultConfig = {
       businessName: "",
       businessLogo: "",
       backgroundColor: "#E3F2FD",
       foregroundColor: "#000000",
       labelColor: "#1976D2",
-      totalUses: 11,
+      totalUses: 10,
       progressText: "Progreso"
     };
 
@@ -49,17 +55,19 @@ export async function POST(request: NextRequest) {
       progressText
     } = body;
 
-    // Por ahora, solo guardamos la configuración en memoria
-    // En una implementación real, esto se guardaría en la base de datos
+    const key = `fidelity_${session.user.id}`;
     const config = {
-      businessName,
-      businessLogo,
+      businessName: businessName || "",
+      businessLogo: businessLogo || "",
       backgroundColor: backgroundColor || "#E3F2FD",
       foregroundColor: foregroundColor || "#000000",
       labelColor: labelColor || "#1976D2",
-      totalUses: totalUses || 11,
+      totalUses: totalUses || 10,
       progressText: progressText || "Progreso"
     };
+
+    // Guardar en almacenamiento temporal
+    tempStorage.set(key, config);
 
     return NextResponse.json({
       success: true,
